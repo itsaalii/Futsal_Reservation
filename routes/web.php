@@ -8,6 +8,29 @@ use Illuminate\Support\Facades\Route;
 // Public Routes (Bisa diakses siapa saja)
 Route::view('/', 'pages.user.index')->name('home');
 
+// Public API untuk kalender
+Route::get('/api/jadwal-kalender', function () {
+    $reservasis = \App\Models\Reservasi::with('user')->whereNotIn('status', ['dibatalkan'])->get();
+    
+    $events = $reservasis->map(function ($reservasi) {
+        $title = $reservasi->catatan ?: 'Dibooking';
+        
+        $color = '#3f8f5f'; // grass dark
+        if ($reservasi->status == 'menunggu' || $reservasi->status == 'pending') {
+            $color = '#f97316'; // accent orange
+        }
+        
+        return [
+            'title' => $title,
+            'start' => $reservasi->tanggal . 'T' . $reservasi->jam_mulai,
+            'end' => $reservasi->tanggal . 'T' . $reservasi->jam_selesai,
+            'color' => $color
+        ];
+    });
+    
+    return response()->json($events);
+});
+
 // Guest Routes (Hanya untuk pengguna yang belum login)
 // Route::middleware('guest')->group(function () {
 Route::view('/login', 'pages.user.login')->name('login');

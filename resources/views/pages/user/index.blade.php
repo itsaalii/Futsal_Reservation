@@ -139,6 +139,18 @@
       </div>
     </section>
 
+    <section id="jadwal-kalender" class="py-5">
+      <div class="container py-4">
+        <div class="text-center mb-4">
+          <p class="section-kicker mb-2">Cek Ketersediaan</p>
+          <h2 class="section-title">Jadwal Peminjaman Lapangan</h2>
+        </div>
+        <div class="panel-box">
+          <div id="calendar"></div>
+        </div>
+      </div>
+    </section>
+
     <section id="harga" class="py-5 band-section">
       <div class="container py-4">
         <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
@@ -215,3 +227,105 @@
 
   @include('partials.user.footer')
 @endsection
+
+@push('styles')
+<style>
+  #calendar {
+    font-family: 'Manrope', sans-serif;
+  }
+  .fc-event {
+    border: none !important;
+    border-radius: 6px;
+    padding: 2px 4px;
+  }
+  .fc-event-title {
+    font-weight: 700;
+  }
+  .fc-timegrid-slot {
+    height: 2.5em; /* Make slots slightly taller for readability */
+  }
+  /* Merubah warna tombol FullCalendar menjadi kehijauan */
+  .fc .fc-button-primary {
+    background-color: var(--jf-grass, #68b97f);
+    border-color: var(--jf-grass, #68b97f);
+    text-transform: capitalize;
+  }
+  .fc .fc-button-primary:hover {
+    background-color: var(--jf-grass-dark, #3f8f5f);
+    border-color: var(--jf-grass-dark, #3f8f5f);
+  }
+  .fc .fc-button-primary:not(:disabled):active,
+  .fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: var(--jf-grass-dark, #3f8f5f);
+    border-color: var(--jf-grass-dark, #3f8f5f);
+  }
+  .fc .fc-button-primary:disabled {
+    background-color: #9ec5ac;
+    border-color: #9ec5ac;
+  }
+  /* Merapikan tampilan header hari dan tanggal */
+  .fc-theme-standard th {
+    background-color: #f7fbf7;
+    border-bottom-width: 2px !important;
+  }
+  .fc-col-header-cell-cushion {
+    color: var(--jf-ink);
+    text-decoration: none !important;
+    font-weight: 800;
+    padding: 10px 4px !important;
+    display: block;
+    font-size: 1.05rem;
+  }
+  .fc-col-header-cell-cushion:hover {
+    color: var(--jf-accent);
+  }
+  .fc .fc-col-header-cell.fc-day-today {
+    background-color: #e9f5ed;
+  }
+  /* Tanggal pada mode bulan */
+  .fc-daygrid-day-number {
+    color: var(--jf-ink);
+    text-decoration: none !important;
+    font-weight: 700;
+  }
+  .fc-daygrid-day-number:hover {
+    color: var(--jf-accent);
+  }
+</style>
+@endpush
+
+@push('scripts')
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/id.global.min.js'></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      locale: 'id',
+      initialView: 'timeGridWeek',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      slotMinTime: '07:00:00',
+      slotMaxTime: '24:00:00',
+      allDaySlot: false,
+      events: '/api/jadwal-kalender',
+      height: 'auto',
+      eventTimeFormat: {
+        hour: '2-digit',
+        minute: '2-digit',
+        meridiem: false,
+        hour12: false
+      },
+      slotLabelFormat: {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }
+    });
+    calendar.render();
+  });
+</script>
+@endpush
