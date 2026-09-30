@@ -1,0 +1,817 @@
+:root {
+    --jf-ink: #111827;
+    --jf-subtle: #475569;
+    --jf-bg: #eef3ee;
+    --jf-hero: linear-gradient(135deg, #8cd9af 0%, #69c88f 42%, #d8f7bc 100%);
+    --jf-accent: #f97316;
+    --jf-accent-dark: #ea580c;
+    --jf-panel: #f9fef9;
+    --jf-border: #bfdbca;
+    --jf-grass: #68b97f;
+    --jf-grass-dark: #3f8f5f;
+    --jf-line: rgba(255, 255, 255, 0.65);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Manrope", sans-serif;
+    color: var(--jf-ink);
+    background: var(--jf-bg);
+}
+
+.hero-wrap {
+    background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.5), transparent 40%),
+        repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.08) 0,
+            rgba(255, 255, 255, 0.08) 32px,
+            transparent 32px,
+            transparent 64px
+        ),
+        var(--jf-hero);
+}
+
+.landing-navbar .container {
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 999px;
+    padding: 0.6rem 1rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.hero-wrap::before,
+.hero-wrap::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    border-radius: 999px;
+    filter: blur(2px);
+}
+
+.hero-wrap::before {
+    width: 320px;
+    height: 320px;
+    right: -100px;
+    top: 60px;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.hero-wrap::after {
+    width: 220px;
+    height: 220px;
+    left: -80px;
+    bottom: 40px;
+    background: rgba(255, 193, 128, 0.35);
+}
+
+.hero-ornaments {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.hero-ornament {
+    position: absolute;
+    border-radius: 999px;
+    border: 2px dashed rgba(255, 255, 255, 0.6);
+    opacity: 0.7;
+}
+
+.hero-ornament.ball {
+    width: 58px;
+    height: 58px;
+    right: 12%;
+    top: 22%;
+    background:
+        radial-gradient(circle at 30% 30%, #fff 0 24%, transparent 26%),
+        radial-gradient(circle at 70% 70%, #fff 0 24%, transparent 26%),
+        radial-gradient(circle at 50% 50%, #0f172a 0 20%, transparent 22%),
+        #f1f5f9;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
+}
+
+.hero-ornament.arc {
+    width: 220px;
+    height: 220px;
+    left: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-color: rgba(15, 23, 42, 0.2);
+}
+
+.hero-ornament.goal {
+    width: 150px;
+    height: 90px;
+    right: 6%;
+    bottom: 16%;
+    border-radius: 18px;
+    border: 2px solid rgba(15, 23, 42, 0.22);
+    background:
+        repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 12px,
+            rgba(15, 23, 42, 0.08) 12px,
+            rgba(15, 23, 42, 0.08) 14px
+        ),
+        rgba(255, 255, 255, 0.45);
+}
+
+.hero-content,
+.navbar,
+.footer-wrap,
+main {
+    position: relative;
+    z-index: 1;
+}
+
+.brand-title {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.08em;
+    font-size: 1.6rem;
+}
+
+.nav-link {
+    font-weight: 700;
+}
+
+.landing-menu .landing-link {
+    color: #0f172a;
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    transition: all 0.22s ease;
+}
+
+.landing-menu .landing-link:hover,
+.landing-menu .landing-link:focus {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.btn-topbar-secondary {
+    border: 1px solid rgba(15, 23, 42, 0.28);
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.54);
+    font-weight: 700;
+}
+
+.btn-topbar-secondary:hover,
+.btn-topbar-secondary:focus {
+    border-color: rgba(15, 23, 42, 0.45);
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.kicker,
+.section-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    color: var(--jf-subtle);
+    font-weight: 700;
+}
+
+.hero-title {
+    font-family: "Bebas Neue", sans-serif;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: #0b1325;
+}
+
+.text-dark-70 {
+    color: #334155;
+}
+
+.btn-accent {
+    background: var(--jf-accent);
+    border-color: var(--jf-accent);
+    color: #fff;
+    font-weight: 700;
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+    background: var(--jf-accent-dark);
+    border-color: var(--jf-accent-dark);
+    color: #fff;
+}
+
+.stat-card,
+.info-card,
+.membership-card,
+.panel-box,
+.order-summary,
+.hero-panel {
+    background: var(--jf-panel);
+    border: 1px solid var(--jf-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(20, 20, 20, 0.05);
+}
+
+.stat-card {
+    padding: 0.9rem 1rem;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--jf-subtle);
+}
+
+.hero-panel {
+    transform: rotate(-0.6deg);
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-visual {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(15, 23, 42, 0.2);
+    border-radius: 20px;
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.hero-pitch {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 14px;
+}
+
+.feature-chip {
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.75rem;
+    border: 1px dashed #9ec5ac;
+    font-weight: 600;
+}
+
+.section-title {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.03em;
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.info-card {
+    padding: 1.2rem;
+    transition:
+        transform 0.24s ease,
+        box-shadow 0.24s ease;
+}
+
+.info-card h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.4rem;
+    font-weight: 800;
+}
+
+.info-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(20, 20, 20, 0.12);
+}
+
+.band-section {
+    background: linear-gradient(
+        0deg,
+        rgba(92, 167, 122, 0.12),
+        rgba(92, 167, 122, 0.12)
+    );
+}
+
+.table-pricing {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.table-pricing th {
+    background: #1f1f1f;
+    color: #fff;
+}
+
+.membership-card {
+    padding: 1.4rem;
+    background: linear-gradient(160deg, #f3fdf5 0%, #ecfccb 100%);
+}
+
+.footer-wrap {
+    background: #dff2e3;
+    border-top: 1px solid var(--jf-border);
+}
+
+.page-reservasi {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 40%),
+        repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.22) 0,
+            rgba(255, 255, 255, 0.22) 22px,
+            transparent 22px,
+            transparent 44px
+        ),
+        radial-gradient(circle at 10% 10%, #f4fff6 0, #eef3ee 45%, #e7efe7 100%);
+}
+
+.panel-box,
+.order-summary {
+    padding: 1.25rem;
+}
+
+.steps-wrap {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.step-panel {
+    display: none;
+}
+
+.step-panel.is-active {
+    display: block;
+}
+
+.booking-caption {
+    max-width: 720px;
+}
+
+.form-hint-card {
+    background: #e9f8ee;
+    border: 1px solid #9fd0b1;
+    color: #1b4332;
+    border-radius: 12px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.92rem;
+}
+
+.booking-input-group {
+    background: #fff;
+    border: 1px solid #c6dfd1;
+    border-radius: 14px;
+    padding: 0.85rem;
+}
+
+.step-item {
+    appearance: none;
+    background: #fff;
+    border: 1px dashed #8fbc9f;
+    border-radius: 10px;
+    color: inherit;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0.7rem;
+    font-size: 0.83rem;
+    text-align: center;
+}
+
+.step-item.active {
+    border-style: solid;
+    border-color: #1f1f1f;
+    font-weight: 700;
+}
+
+.step-item:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.order-summary {
+    background: #fff;
+}
+
+.estimated-total {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    padding: 0.65rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    color: #7c2d12;
+}
+
+.estimated-total strong {
+    font-size: 1.05rem;
+}
+
+.upload-proof {
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    border: 1px solid #d8e7de;
+    border-radius: 12px;
+    padding: 0.8rem;
+}
+
+.upload-proof .form-control[type="file"] {
+    border-style: dashed;
+    background: #fff;
+}
+
+.membership-summary {
+    border-top: 4px solid #2f855a;
+}
+
+#membershipForm {
+    padding: 1rem;
+}
+
+#membershipForm .form-control[type="file"] {
+    border-style: dashed;
+    background: #fff;
+}
+
+.form-control,
+.form-select {
+    border-radius: 12px;
+    border-color: #9bc6ab;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #f97316;
+    box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.17);
+}
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent 45%),
+        repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.2) 0,
+            rgba(255, 255, 255, 0.2) 18px,
+            transparent 18px,
+            transparent 36px
+        ),
+        radial-gradient(
+            circle at 85% 12%,
+            rgba(249, 115, 22, 0.28),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 15% 88%,
+            rgba(47, 133, 90, 0.24),
+            transparent 40%
+        ),
+        #edf5ee;
+}
+
+.auth-form-card {
+    padding: 1.6rem;
+    border: 1px solid #b6d2c1;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-ornament {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px dashed rgba(15, 23, 42, 0.2);
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.auth-ornament .ball {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 30% 30%, #fff 0 24%, transparent 26%),
+        radial-gradient(circle at 70% 70%, #fff 0 24%, transparent 26%),
+        radial-gradient(circle at 50% 50%, #0f172a 0 20%, transparent 22%),
+        #f8fafc;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+}
+
+.auth-ornament .lines {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.2) 0,
+        rgba(15, 23, 42, 0.2) 8px,
+        transparent 8px,
+        transparent 16px
+    );
+}
+
+.pitch-banner {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.8), transparent 45%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.08), transparent 40%),
+        linear-gradient(90deg, var(--jf-grass), var(--jf-grass-dark));
+    border: 1px solid rgba(15, 23, 42, 0.2);
+    border-radius: 20px;
+    padding: 1.2rem 1.4rem;
+    color: #0f172a;
+    position: relative;
+    overflow: hidden;
+}
+
+.pitch-visual {
+    max-width: 260px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(15, 23, 42, 0.2);
+    border-radius: 18px;
+    padding: 0.6rem;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+.pitch-img {
+    width: 100%;
+    display: block;
+    border-radius: 12px;
+}
+
+.pitch-banner::before,
+.pitch-banner::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    border: 2px solid var(--jf-line);
+    opacity: 0.7;
+}
+
+.pitch-banner::before {
+    width: 140px;
+    height: 140px;
+    right: -40px;
+    top: -50px;
+}
+
+.pitch-banner::after {
+    width: 90px;
+    height: 90px;
+    left: -30px;
+    bottom: -30px;
+}
+
+.pitch-banner .badge {
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.pitch-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.pitch-step {
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(15, 23, 42, 0.15);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.auth-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+}
+
+.auth-login .auth-form-card {
+    border-top: 5px solid #f97316;
+}
+
+.auth-register .auth-form-card {
+    border-top: 5px solid #2f855a;
+}
+
+.back-link {
+    text-decoration: none;
+    color: var(--jf-ink);
+    font-weight: 700;
+}
+
+.back-link:hover {
+    color: #f97316;
+}
+
+@media (max-width: 991.98px) {
+    .landing-navbar .container {
+        border-radius: 20px;
+    }
+
+    .hero-panel {
+        transform: none;
+    }
+
+    .pitch-visual {
+        max-width: 100%;
+    }
+
+    .steps-wrap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .steps-wrap {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-page {
+    background:
+        radial-gradient(
+            circle at 85% 8%,
+            rgba(249, 115, 22, 0.18),
+            transparent 36%
+        ),
+        radial-gradient(
+            circle at 10% 90%,
+            rgba(47, 133, 90, 0.2),
+            transparent 30%
+        ),
+        #edf3ef;
+    min-height: 100vh;
+}
+
+.admin-header .container {
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 18px;
+    border: 1px solid #c7dfd0;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+}
+
+.admin-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.admin-nav-link {
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+    color: #0f172a;
+    border: 1px solid #bfd8c8;
+    border-radius: 999px;
+    padding: 0.46rem 1.02rem;
+    background: #f7fbf7;
+    transition: all 0.2s ease;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link:focus {
+    color: #0f172a;
+    border-color: #9cbfad;
+    background: #fff;
+}
+
+.admin-nav-link.active {
+    background: linear-gradient(145deg, #1f2937, #111827);
+    border-color: #1f2937;
+    color: #fff;
+}
+
+.admin-stat-card {
+    background: #fff;
+    border: 1px solid #c2d7ca;
+    border-radius: 16px;
+    padding: 0.95rem;
+    box-shadow: 0 8px 20px rgba(20, 20, 20, 0.05);
+    height: 100%;
+}
+
+.admin-stat-card p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.admin-stat-card h2 {
+    margin: 0.2rem 0 0;
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.035em;
+    font-size: clamp(1.8rem, 3vw, 2.3rem);
+}
+
+.admin-page {
+    font-feature-settings:
+        "liga" 1,
+        "kern" 1;
+}
+
+.admin-header h1 {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.025em;
+    line-height: 0.95;
+    font-size: clamp(2.15rem, 3.4vw, 3.2rem);
+}
+
+.admin-page .section-kicker {
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+}
+
+.admin-page .panel-box h2,
+.admin-page .panel-box h3 {
+    font-weight: 800;
+    letter-spacing: 0.01em;
+}
+
+.admin-activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.8rem;
+}
+
+.admin-activity-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    border: 1px solid #cfe2d5;
+    border-radius: 12px;
+    padding: 0.8rem;
+    background: #fff;
+}
+
+.admin-activity-item strong {
+    min-width: 140px;
+}
+
+.admin-page .panel-box {
+    border-color: #c6dacd;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fcf9 100%);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.admin-page .table {
+    margin-bottom: 0;
+}
+
+.admin-page .table thead th {
+    background: #f1f6f2;
+    color: #0f172a;
+    font-size: 0.83rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #d7e6dd;
+}
+
+.admin-page .table tbody td {
+    border-color: #e4efe8;
+    vertical-align: middle;
+}
+
+.admin-page .table tbody tr:hover {
+    background: #f8fcf9;
+}
+
+.admin-form-card {
+    border-top: 5px solid #f97316;
+}
+
+@media (max-width: 767.98px) {
+    .admin-header .container {
+        border-radius: 12px;
+    }
+
+    .admin-nav {
+        gap: 0.4rem;
+    }
+
+    .admin-nav-link {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.86rem;
+    }
+}
