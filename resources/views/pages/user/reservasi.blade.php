@@ -282,7 +282,7 @@
                                                             $isActiveCourt = ($unpaidReservasi ? $unpaidReservasi->id_lapangan == $lap->id : $idx === 0);
                                                         @endphp
                                                         <div class="col-md-4">
-                                                            <label class="court-card-label d-block h-100 p-3 border rounded-3 text-start position-relative cursor-pointer transition-all {{ $isActiveCourt ? 'border-success bg-success-subtle active-court shadow-sm' : 'bg-light' }}" style="cursor: pointer; transition: all 0.2s ease;">
+                                                            <label class="court-card-label d-block h-100 p-3.5 sm:p-4 border rounded-4 text-start position-relative cursor-pointer transition-all {{ $isActiveCourt ? 'border-success bg-success-subtle active-court shadow-sm' : 'bg-light' }}" style="cursor: pointer; transition: all 0.2s ease;">
                                                                 <input type="radio" name="id_lapangan" value="{{ $lap->id }}" class="form-check-input court-radio position-absolute top-0 end-0 m-3" 
                                                                     {{ $isActiveCourt ? 'checked' : '' }}
                                                                     {{ $unpaidReservasi ? 'disabled' : 'required' }}
@@ -452,9 +452,9 @@
                                             <option value="QRIS">QRIS</option>
                                         </select>
                                     </div>
-                                    <div class="mb-3 d-none text-center p-3 border rounded shadow-sm" id="qrisBox">
-                                        <p class="mb-2 fw-bold">Scan QRIS Berikut:</p>
-                                        <img src="{{ asset('assets/img/qris.png') }}" alt="QRIS Futsal" class="img-fluid" style="max-height: 250px;">
+                                    <div class="mb-3 d-none text-center p-4 sm:p-5 border rounded-4 bg-light shadow-2xs" id="qrisBox">
+                                        <p class="mb-3 fw-bold text-dark">Scan QRIS Berikut untuk Pembayaran:</p>
+                                        <img src="{{ asset('assets/img/qris.png') }}" alt="QRIS Futsal" class="img-fluid rounded-3 border bg-white p-2 shadow-xs" style="max-height: 250px;">
                                     </div>
                                     <div class="upload-proof mb-3">
                                         <label class="form-label" for="buktiReservasi">
@@ -602,9 +602,9 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12 mt-3 text-center p-3 border rounded shadow-sm">
-                                    <p class="mb-2 fw-bold">Scan QRIS Untuk Bayar Membership:</p>
-                                    <img src="{{ asset('assets/img/qris.png') }}" alt="QRIS Futsal" class="img-fluid" style="max-height: 250px;">
+                                <div class="col-12 mt-3 text-center p-4 sm:p-5 border rounded-4 bg-light shadow-2xs">
+                                    <p class="mb-3 fw-bold text-dark">Scan QRIS Untuk Bayar Membership:</p>
+                                    <img src="{{ asset('assets/img/qris.png') }}" alt="QRIS Futsal" class="img-fluid rounded-3 border bg-white p-2 shadow-xs" style="max-height: 250px;">
                                 </div>
 
                                 <div class="col-12 mt-3">

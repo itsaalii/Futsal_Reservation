@@ -1,9 +1,26 @@
-# Improvements sistem reservasi lapangan futsal
+# Improvements desain ui sistem reservasi lapangan futsal
 
-## Rombak total desain tampilan 
-1. gunakan tailwind css via cdn
-2. pallete warna ambil dari https://psd-interpolasi.basisdata2-c.my.id/
-3. desain navigasi dashboard ada di sebelah kiri (sidebar berikan toggle untuk memunculkan dan menyembunyikan sidebar)
-4. buat tampilan lebih modern dengan mengikuti trend desain masa kini 
-5. hilangkan icon icon tidak jelas atau tidak diperlukan, gunakan heroicon
-6. selaraskan semua pallete warna, termasuk pada halaman kiosk absensi
+pallete warna yang digunakan adalah sebagai berikut
+:root {
+  --primary: #2F6BFF;
+  --primary-dark: #3A4BD1;
+  --secondary: #7B5CE6;
+  --accent: #4FA8F0;
+
+  --bg-page: #DCE4EF;
+  --bg-sidebar: #C9D6F2;
+  --bg-card: rgba(255, 255, 255, 0.55);
+  --border-card: rgba(255, 255, 255, 0.7);
+
+  --text-heading: #12162B;
+  --text-name: #1E2A78;
+  --text-muted: #5B6478;
+  --text-disabled: #8A93A6;
+
+  --success: #22B14C;
+  --warning: #F5A524;
+  --danger: #EF4F5F;
+  --info: #3B82F6;
+}
+
+desain layout gambar @desain.jpeg

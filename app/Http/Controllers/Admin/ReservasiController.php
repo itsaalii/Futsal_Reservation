@@ -160,13 +160,12 @@ class ReservasiController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $pelanggan = User::where('role', 'user')->get();
-
         if ($user->isSuperAdmin()) {
-            $lapangans = Lapangan::where('status', 'aktif')->get();
-        } else {
-            $lapangans = Lapangan::where('id', $user->id_lapangan)->where('status', 'aktif')->get();
+            return redirect()->route('admin.reservasi')->with('error', 'Booking offline (walk-in) hanya dilayani oleh admin operasional lapangan.');
         }
+
+        $pelanggan = User::where('role', 'user')->get();
+        $lapangans = Lapangan::where('id', $user->id_lapangan)->where('status', 'aktif')->get();
 
         return view('pages.admin.reservasi-manual', compact('pelanggan', 'lapangans', 'user'));
     }
@@ -174,6 +173,9 @@ class ReservasiController extends Controller
     public function store(Request $request)
     {
         $userAuth = Auth::user();
+        if ($userAuth->isSuperAdmin()) {
+            return redirect()->route('admin.reservasi')->with('error', 'Booking offline (walk-in) hanya dilayani oleh admin operasional lapangan.');
+        }
 
         $rules = [
             'id_user' => 'required|exists:users,id',

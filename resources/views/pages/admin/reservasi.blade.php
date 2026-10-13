@@ -102,12 +102,14 @@
           </div>
           <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Konfirmasi pembayaran, mulai sesi, atau batalkan reservasi.</p>
         </div>
-        <a href="{{ route('admin.reservasi.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white transition self-start sm:self-auto shadow-sm">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Tambah Reservasi Kasir</span>
-        </a>
+        @if(!$user->isSuperAdmin())
+          <a href="{{ route('admin.reservasi.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-[#2F6BFF] hover:bg-[#3A4BD1] text-white transition self-start sm:self-auto shadow-sm">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Tambah Reservasi Kasir</span>
+          </a>
+        @endif
       </div>
 
       <div class="mt-4 -mx-5 sm:-mx-6 overflow-x-auto">

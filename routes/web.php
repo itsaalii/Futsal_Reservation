@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LapanganController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MembershipController as AdminMembershipController;
+use App\Http\Controllers\Admin\PegawaiController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PenggajianController;
 use App\Http\Controllers\Admin\ReservasiController as AdminReservasiController;
@@ -38,9 +39,9 @@ Route::get('/api/jadwal-kalender', function (Request $request) {
         $lapanganName = $reservasi->lapangan ? '[' . $reservasi->lapangan->nama . '] ' : '';
         $title = $lapanganName . ($reservasi->catatan ?: 'Dibooking');
 
-        $color = '#3f8f5f'; // grass dark
+        $color = '#2F6BFF'; // primary blue
         if ($reservasi->status == 'menunggu' || $reservasi->status == 'pending') {
-            $color = '#f97316'; // accent orange
+            $color = '#F5A524'; // warning orange
         }
 
         return [
@@ -144,6 +145,16 @@ Route::middleware('auth')->group(function () {
                 Route::post('/penggajian/generate', 'generate')->name('admin.penggajian.generate');
                 Route::post('/penggajian/{id}/bayar', 'bayar')->name('admin.penggajian.bayar');
                 Route::get('/penggajian/export', 'export')->name('admin.penggajian.export');
+            });
+
+            // Manajemen Akun Pegawai (Superadmin Only)
+            Route::controller(PegawaiController::class)->group(function () {
+                Route::get('/pegawai', 'index')->name('admin.pegawai');
+                Route::get('/pegawai/create', 'create')->name('admin.pegawai.create');
+                Route::post('/pegawai', 'store')->name('admin.pegawai.store');
+                Route::get('/pegawai/{id}/edit', 'edit')->name('admin.pegawai.edit');
+                Route::put('/pegawai/{id}', 'update')->name('admin.pegawai.update');
+                Route::delete('/pegawai/{id}', 'destroy')->name('admin.pegawai.destroy');
             });
         });
     });

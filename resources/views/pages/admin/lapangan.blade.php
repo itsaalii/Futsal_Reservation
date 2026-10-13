@@ -9,19 +9,21 @@
   ])
 
   <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+    <section class="glass-card p-5 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/60">
         <div>
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-2">
-            <span>👑</span>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-[#2F6BFF] border border-primary-200 mb-2">
+            <svg class="w-3.5 h-3.5 text-[#2F6BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
             <span>Hak Akses Superadmin</span>
           </div>
-          <h2 class="text-base sm:text-lg font-bold text-ink">Daftar Lapangan Futsal</h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h2 class="text-base sm:text-lg font-bold text-[#12162B]">Daftar Lapangan Futsal</h2>
+          <p class="text-xs sm:text-sm text-[#5B6478] mt-0.5">
             Kelola master data lapangan, tipe lantai, status ketersediaan, serta tarif sewa siang dan malam.
           </p>
         </div>
-        <a href="{{ route('admin.lapangan.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white transition self-start sm:self-auto shadow-sm">
+        <a href="{{ route('admin.lapangan.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#2F6BFF] hover:bg-[#3A4BD1] text-white transition self-start sm:self-auto shadow-sm shadow-blue-500/25">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -51,35 +53,35 @@
       <!-- Court Cards Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
         @forelse($lapangans as $item)
-          <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition flex flex-col p-5">
+          <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-white/80 shadow-2xs hover:shadow-md transition flex flex-col p-5 sm:p-6">
             <div class="flex items-start justify-between gap-2 mb-3">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider {{ $item->status === 'aktif' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($item->status === 'maintenance' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600') }}">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider {{ $item->status === 'aktif' ? 'bg-emerald-500/10 text-[#22B14C] border border-emerald-300/40' : ($item->status === 'maintenance' ? 'bg-amber-500/10 text-[#F5A524] border border-amber-300/40' : 'bg-white/60 text-[#5B6478]') }}">
                 {{ $item->status }}
               </span>
-              <span class="font-mono text-xs text-slate-400">#LAP-{{ str_pad($item->id, 2, '0', STR_PAD_LEFT) }}</span>
+              <span class="font-mono text-xs text-[#8A93A6]">#LAP-{{ str_pad($item->id, 2, '0', STR_PAD_LEFT) }}</span>
             </div>
 
-            <h3 class="text-base font-bold text-ink">{{ $item->nama }}</h3>
-            <div class="flex items-center gap-1.5 text-xs text-teal-700 font-medium mt-1 mb-2">
+            <h3 class="text-base font-bold text-[#12162B]">{{ $item->nama }}</h3>
+            <div class="flex items-center gap-1.5 text-xs text-[#2F6BFF] font-semibold mt-1 mb-2">
               <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
               <span>{{ $item->tipe_lantai }}</span>
             </div>
 
-            <p class="text-xs text-slate-500 flex-1 mb-4 line-clamp-2">
+            <p class="text-xs text-[#5B6478] flex-1 mb-4 line-clamp-2">
               {{ $item->deskripsi ?: 'Tidak ada deskripsi spesifik.' }}
             </p>
 
             <!-- Pricing Box -->
-            <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-100 space-y-1.5 text-xs mb-4">
+            <div class="bg-white/50 rounded-xl p-3.5 sm:p-4 border border-white/70 space-y-2 text-xs mb-4">
               <div class="flex items-center justify-between">
-                <span class="text-slate-500">Tarif Siang (07-17):</span>
-                <span class="font-bold text-ink">Rp {{ number_format($item->tarif_siang, 0, ',', '.') }}/jam</span>
+                <span class="text-[#5B6478]">Tarif Siang (07-17):</span>
+                <span class="font-bold text-[#12162B]">Rp {{ number_format($item->tarif_siang, 0, ',', '.') }}/jam</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-500">Tarif Malam (17-23):</span>
-                <span class="font-bold text-teal-700">Rp {{ number_format($item->tarif_malam, 0, ',', '.') }}/jam</span>
+                <span class="text-[#5B6478]">Tarif Malam (17-23):</span>
+                <span class="font-bold text-[#2F6BFF]">Rp {{ number_format($item->tarif_malam, 0, ',', '.') }}/jam</span>
               </div>
             </div>
 

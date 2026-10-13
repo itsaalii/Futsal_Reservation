@@ -9,15 +9,17 @@
   ])
 
   <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
-    <section class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+    <section class="glass-card p-5 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/60">
         <div>
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-2">
-            <span>👑</span>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-[#2F6BFF] border border-primary-200 mb-2">
+            <svg class="w-3.5 h-3.5 text-[#2F6BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
             <span>Hak Akses Superadmin</span>
           </div>
-          <h2 class="text-base sm:text-lg font-bold text-ink">Payroll & Rekapitulasi Gaji Pegawai</h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <h2 class="text-base sm:text-lg font-bold text-[#12162B]">Payroll & Rekapitulasi Gaji Pegawai</h2>
+          <p class="text-xs sm:text-sm text-[#5B6478] mt-0.5">
             Dihitung otomatis berdasarkan rekam absensi RFID, shift terjadwal, gaji pokok, serta insentif kehadiran pegawai.
           </p>
         </div>
@@ -25,15 +27,15 @@
           <form action="{{ route('admin.penggajian.generate') }}" method="POST">
             @csrf
             <input type="hidden" name="periode" value="{{ $periode }}">
-            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm">
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#2F6BFF] hover:bg-[#3A4BD1] text-white transition shadow-sm shadow-blue-500/25">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <span>Hitung Ulang Kehadiran & Gaji</span>
             </button>
           </form>
-          <a href="{{ route('admin.penggajian.export', ['periode' => $periode]) }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-2xs">
-            <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <a href="{{ route('admin.penggajian.export', ['periode' => $periode]) }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-white/70 hover:bg-white text-[#12162B] border border-white/80 transition shadow-2xs">
+            <svg class="w-4 h-4 text-[#5B6478]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span>Export CSV</span>
@@ -42,8 +44,8 @@
       </div>
 
       @if(session('success'))
-        <div class="mt-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 flex items-center gap-3 text-sm">
-          <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mt-4 bg-emerald-500/10 border border-emerald-300/40 text-[#22B14C] rounded-2xl p-4 flex items-center gap-3 text-sm">
+          <svg class="w-5 h-5 text-[#22B14C] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>{{ session('success') }}</span>
@@ -53,46 +55,46 @@
       <!-- Filter Periode Bulan -->
       <form method="GET" action="{{ route('admin.penggajian') }}" class="my-5 flex flex-wrap items-end gap-3 max-w-md">
         <div class="flex-1 min-w-[200px]">
-          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Pilih Periode Penggajian:</label>
-          <input type="month" name="periode" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20 bg-white" value="{{ $periode }}" onchange="this.form.submit()">
+          <label class="block text-xs font-bold text-[#5B6478] uppercase tracking-wider mb-1.5">Pilih Periode Penggajian:</label>
+          <input type="month" name="periode" class="w-full px-3.5 py-2 rounded-xl border border-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 bg-white/70" value="{{ $periode }}" onchange="this.form.submit()">
         </div>
-        <button type="submit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white transition">
+        <button type="submit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-[#12162B] hover:bg-slate-800 text-white transition">
           Terapkan
         </button>
       </form>
 
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-slate-50/80 rounded-2xl border border-slate-200/80 p-4.5">
-          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Total Anggaran Gaji</span>
-          <div class="mt-2 text-2xl font-extrabold text-ink">
+        <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-white/80 p-5 sm:p-6 shadow-2xs">
+          <span class="text-xs font-bold text-[#5B6478] uppercase tracking-wider block">Total Anggaran Gaji</span>
+          <div class="mt-2 text-2xl font-extrabold text-[#12162B]">
             Rp {{ number_format($totalPengeluaranGaji, 0, ',', '.') }}
           </div>
-          <p class="text-[11px] text-slate-400 mt-1">Periode {{ \Carbon\Carbon::createFromFormat('Y-m', $periode)->translatedFormat('F Y') }}</p>
+          <p class="text-[11px] text-[#8A93A6] mt-1">Periode {{ \Carbon\Carbon::createFromFormat('Y-m', $periode)->translatedFormat('F Y') }}</p>
         </div>
 
-        <div class="bg-slate-50/80 rounded-2xl border border-slate-200/80 p-4.5">
-          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Jumlah Pegawai</span>
-          <div class="mt-2 text-2xl font-extrabold text-ink">
+        <div class="bg-white/60 backdrop-blur-md rounded-2xl border border-white/80 p-5 sm:p-6 shadow-2xs">
+          <span class="text-xs font-bold text-[#5B6478] uppercase tracking-wider block">Jumlah Pegawai</span>
+          <div class="mt-2 text-2xl font-extrabold text-[#12162B]">
             {{ $totalPegawaiTergaji }} Pegawai
           </div>
-          <p class="text-[11px] text-slate-400 mt-1">Staff operasional aktif</p>
+          <p class="text-[11px] text-[#8A93A6] mt-1">Staff operasional aktif</p>
         </div>
 
-        <div class="bg-emerald-50/60 rounded-2xl border border-emerald-200/80 p-4.5">
-          <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Sudah Dibayarkan</span>
-          <div class="mt-2 text-2xl font-extrabold text-emerald-700">
+        <div class="bg-emerald-500/10 backdrop-blur-md rounded-2xl border border-emerald-300/40 p-5 sm:p-6 shadow-2xs">
+          <span class="text-xs font-bold text-[#22B14C] uppercase tracking-wider block">Sudah Dibayarkan</span>
+          <div class="mt-2 text-2xl font-extrabold text-[#22B14C]">
             Rp {{ number_format($totalSudahDibayar, 0, ',', '.') }}
           </div>
-          <p class="text-[11px] text-emerald-600 mt-1">Status Lunas</p>
+          <p class="text-[11px] text-[#22B14C]/80 mt-1">Status Lunas</p>
         </div>
 
-        <div class="bg-amber-50/60 rounded-2xl border border-amber-200/80 p-4.5">
-          <span class="text-xs font-bold text-amber-800 uppercase tracking-wider block">Menunggu Bayar</span>
-          <div class="mt-2 text-2xl font-extrabold text-amber-700">
+        <div class="bg-amber-500/10 backdrop-blur-md rounded-2xl border border-amber-300/40 p-5 sm:p-6 shadow-2xs">
+          <span class="text-xs font-bold text-[#F5A524] uppercase tracking-wider block">Menunggu Bayar</span>
+          <div class="mt-2 text-2xl font-extrabold text-[#F5A524]">
             Rp {{ number_format($totalMenungguBayar, 0, ',', '.') }}
           </div>
-          <p class="text-[11px] text-amber-600 mt-1">Status Pending</p>
+          <p class="text-[11px] text-[#F5A524]/80 mt-1">Status Pending</p>
         </div>
       </div>
 
@@ -208,7 +210,7 @@
                           </div>
                         </div>
 
-                        <div class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg italic">
+                        <div class="text-xs text-slate-500 bg-slate-50 p-3.5 rounded-xl border border-slate-100 italic">
                           Catatan: {{ $gaji->catatan ?: 'Kehadiran terverifikasi RFID.' }}
                         </div>
                       </div>
