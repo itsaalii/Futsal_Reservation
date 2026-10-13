@@ -43,7 +43,7 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
             
-            if ($user && $user->role === 'admin') {
+            if ($user && in_array($user->role, ['admin', 'superadmin'])) {
                 return redirect('/admin/dashboard')->with('success', 'Login berhasil. Selamat datang! ' . $user->nama);
             }
 

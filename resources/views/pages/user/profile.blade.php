@@ -1,81 +1,136 @@
 @extends('layouts.app')
 
-@section('title', 'Profil Member | Jaya Futsal')
+@section('title', 'Profil Member & Keanggotaan | Jaya Futsal')
 
 @section('content')
-    @include('partials.user.reservasi-navbar')
+  @include('partials.user.reservasi-navbar')
 
-    <main class="py-4 py-lg-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-header bg-dark text-white p-4 border-0 rounded-top-4 d-flex align-items-center gap-3">
-                            <img src="{{ asset('assets/img/user-avatar.png') }}" onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($user->nama) }}&background=fff&color=000'" alt="Profile" class="rounded-circle" width="80" height="80" style="object-fit: cover; border: 3px solid #fff;">
-                            <div>
-                                <h3 class="h4 mb-1">{{ $user->nama }}</h3>
-                                <p class="mb-0 text-white-50">{{ $user->email }} | {{ $user->no_hp }}</p>
-                            </div>
-                        </div>
-                        <div class="card-body p-4">
-                            <h4 class="h5 mb-4">Status Keanggotaan (Membership)</h4>
-                            
-                            @if(empty($user->membership_type) || $user->membership_status === 'rejected')
-                                <div class="alert alert-secondary">
-                                    <h5 class="alert-heading">Belum Terdaftar Member</h5>
-                                    <p class="mb-0">Kamu saat ini belum tergabung sebagai member eksklusif. Daftarkan timmu untuk dapatkan promo khusus!</p>
-                                    @if($user->membership_status === 'rejected')
-                                        <hr>
-                                        <p class="mb-0 text-danger"><b>Info:</b> Pengajuan membership kamu sebelumnya ditolak oleh admin.</p>
-                                    @endif
-                                </div>
-                            @elseif($user->membership_status === 'pending')
-                                <div class="alert alert-warning">
-                                    <h5 class="alert-heading">Menunggu Verifikasi</h5>
-                                    <p class="mb-0">Pengajuan paket <b>{{ $user->membership_type }}</b> kamu sedang diperiksa oleh admin. Harap tunggu!</p>
-                                </div>
-                            @elseif($user->membership_status === 'active')
-                                @php
-                                    $expires = \Carbon\Carbon::parse($user->membership_expires_at);
-                                    $sisaHari = now()->diffInDays($expires, false);
-                                @endphp
-                                @if($sisaHari < 0)
-                                    <div class="alert alert-danger">
-                                        <h5 class="alert-heading">Membership Kedaluwarsa!</h5>
-                                        <p class="mb-0">Membership <b>Member Jaya Futsal</b> kamu sudah habis masa aktifnya sejak {{ $expires->format('d M Y') }}.</p>
-                                    </div>
-                                @else
-                                    <div class="alert alert-success">
-                                        <h5 class="alert-heading d-flex align-items-center gap-2">
-                                            <i class="bi bi-patch-check-fill text-success fs-4"></i>
-                                            Member Aktif: Member Jaya Futsal
-                                        </h5>
-                                        <p class="mb-0 mt-2">Masa aktif membership kamu sampai dengan <b>{{ $expires->format('d M Y') }}</b>.</p>
-                                        <hr>
-                                        <p class="mb-0"><b>Sisa Waktu:</b> {{ intval($sisaHari) }} hari lagi.</p>
-                                        <p class="mb-0 mt-1">
-                                            <b>Voucher Free 1 Jam:</b>
-                                            @if(!$user->membership_free_hour_used)
-                                                <span class="badge bg-success">Tersedia</span> — Akan otomatis diterapkan saat booking berikutnya.
-                                            @else
-                                                <span class="badge bg-secondary">Sudah Digunakan</span>
-                                            @endif
-                                        </p>
-                                        <p class="mb-0 mt-1">
-                                            <b>Diskon 15%:</b>
-                                            <span class="badge bg-success">Aktif</span> — Otomatis diterapkan di setiap reservasi selama masa aktif.
-                                        </p>
-                                    </div>
-                                @endif
-                            @endif
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6">
+    <!-- Back to Booking -->
+    <a href="{{ route('reservasi.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-ink transition">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      <span>Kembali ke Dashboard Reservasi</span>
+    </a>
 
-                            <div class="mt-4">
-                                <a href="{{ route('reservasi.index') }}" class="btn btn-outline-dark">Kembali ke Reservasi</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Profile Header Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm">
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+        <div class="w-20 h-20 rounded-2xl bg-teal-600 text-white font-black text-2xl flex items-center justify-center shadow-md">
+          {{ strtoupper(substr($user->nama ?? 'U', 0, 1)) }}
         </div>
-    </main>
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+            <h1 class="text-2xl font-black text-ink">{{ $user->nama }}</h1>
+            @if($user->status_member && $user->membership_status === 'active')
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
+                Member VIP
+              </span>
+            @endif
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 font-mono">
+            {{ $user->email }} • {{ $user->no_hp ?: 'No HP belum terdaftar' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Membership Status Section -->
+    <div class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm">
+      <div class="pb-4 border-b border-slate-100 mb-6 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-ink">Status Keanggotaan (Membership)</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Pantau masa aktif paket dan voucher keuntungan Anda.</p>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-semibold">Keanggotaan</span>
+      </div>
+
+      @if(empty($user->membership_type) || $user->membership_status === 'rejected')
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 text-slate-700 space-y-2">
+          <h3 class="font-bold text-sm text-ink">Belum Terdaftar Sebagai Member</h3>
+          <p class="text-xs text-slate-500">
+            Daftarkan tim Anda sekarang untuk menikmati diskon tetap 15% setiap bermain dan voucher free 1 jam main pertama.
+          </p>
+          @if($user->membership_status === 'rejected')
+            <p class="text-xs text-rose-600 font-semibold pt-2 border-t border-slate-200">
+              Catatan: Pengajuan membership sebelumnya ditolak atau bukti pembayaran belum valid.
+            </p>
+          @endif
+          <div class="pt-2">
+            <a href="{{ url('/reservasi?show_membership=1') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white transition shadow-sm">
+              Daftar Paket Member
+            </a>
+          </div>
+        </div>
+      @elseif($user->membership_status === 'pending')
+        <div class="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 text-amber-900 space-y-2">
+          <div class="flex items-center gap-2 font-bold text-sm text-amber-800">
+            <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Menunggu Konfirmasi Pembayaran</span>
+          </div>
+          <p class="text-xs text-amber-700">
+            Pengajuan paket <strong>{{ $user->membership_type }}</strong> Anda sedang diverifikasi oleh admin. Harap tunggu sesaat.
+          </p>
+        </div>
+      @elseif($user->membership_status === 'active')
+        @php
+          $expires = \Carbon\Carbon::parse($user->membership_expires_at);
+          $sisaHari = (int) now()->diffInDays($expires, false);
+        @endphp
+        @if($sisaHari < 0)
+          <div class="rounded-2xl border border-rose-200 bg-rose-50/60 p-5 text-rose-900 space-y-2">
+            <h3 class="font-bold text-sm text-rose-800">Membership Kedaluwarsa!</h3>
+            <p class="text-xs text-rose-700">
+              Masa aktif membership Anda telah berakhir sejak {{ $expires->translatedFormat('d F Y') }}.
+            </p>
+            <div class="pt-2">
+              <a href="{{ url('/reservasi?show_membership=1') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white transition">
+                Perpanjang Membership
+              </a>
+            </div>
+          </div>
+        @else
+          <div class="rounded-2xl border border-teal-200 bg-teal-50/60 p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-teal-200/60">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                <span class="font-bold text-base text-teal-900">Member Aktif: {{ $user->membership_type ?: 'Member Jaya Futsal' }}</span>
+              </div>
+              <span class="text-xs font-bold text-teal-800 bg-teal-100/80 px-2.5 py-0.5 rounded-full">
+                Sisa {{ $sisaHari }} hari lagi
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-white/80 p-3 rounded-xl border border-teal-200/60">
+                <span class="text-slate-500 block mb-0.5">Voucher Free 1 Jam Main:</span>
+                @if(!$user->membership_free_hour_used)
+                  <span class="font-bold text-emerald-700 inline-flex items-center gap-1">
+                    <span>✓ Tersedia</span>
+                    <span class="text-[11px] text-slate-400 font-normal">(Otomatis aktif saat booking)</span>
+                  </span>
+                @else
+                  <span class="font-bold text-slate-400">Sudah Digunakan</span>
+                @endif
+              </div>
+
+              <div class="bg-white/80 p-3 rounded-xl border border-teal-200/60">
+                <span class="text-slate-500 block mb-0.5">Diskon 15% Semua Lapangan:</span>
+                <span class="font-bold text-emerald-700">✓ Aktif Sepanjang Periode</span>
+              </div>
+            </div>
+
+            <p class="text-xs text-teal-800">
+              Berlaku hingga: <strong>{{ $expires->translatedFormat('d F Y') }}</strong>
+            </p>
+          </div>
+        @endif
+      @endif
+    </div>
+  </main>
+
+  @include('partials.user.footer')
 @endsection

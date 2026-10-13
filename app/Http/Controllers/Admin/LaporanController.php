@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Lapangan;
 use App\Models\Reservasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LaporanController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
         $paidStatuses = ['disetujui', 'selesai', 'dibayar'];
 
         // Ambil semua filter dari request
@@ -19,6 +22,20 @@ class LaporanController extends Controller
         $statusFilter = $request->input('status');
         $tanggalDari = $request->input('tanggal_dari');
         $tanggalSampai = $request->input('tanggal_sampai');
+
+        // Filter lapangan berdasarkan peran
+        $lapangans = collect();
+        $assignedLapangan = null;
+        $lapanganFilter = null;
+
+        if ($user->isSuperAdmin()) {
+            $lapangans = Lapangan::all();
+            $lapanganFilter = $request->input('lapangan_id');
+        } else {
+            // Admin (pegawai) HANYA BISA melihat lapangan yang ditugaskan kepadanya
+            $lapanganFilter = $user->id_lapangan;
+            $assignedLapangan = $user->lapangan;
+        }
 
         $filterDate = null;
         if (!empty($bulanFilter)) {
@@ -30,7 +47,13 @@ class LaporanController extends Controller
         }
 
         // Base query builder untuk semua data yang relevan (lunas + batal)
-        $baseQuery = Reservasi::whereIn('status', array_merge($paidStatuses, ['dibatalkan']));
+        $baseQuery = Reservasi::with(['user', 'lapangan'])
+            ->whereIn('status', array_merge($paidStatuses, ['dibatalkan']));
+
+        // Terapkan filter lapangan
+        if (!empty($lapanganFilter)) {
+            $baseQuery->where('id_lapangan', $lapanganFilter);
+        }
 
         // Terapkan filter bulan
         if ($filterDate) {
@@ -57,19 +80,19 @@ class LaporanController extends Controller
             }
         }
 
-        // Statistik card — ikut filter (opsi B)
+        // Statistik card — ikut filter
         $totalPendapatan = (clone $baseQuery)->whereIn('status', $paidStatuses)->sum('total_harga');
         $totalTransaksi = (clone $baseQuery)->whereIn('status', $paidStatuses)->count();
         $totalBatal = (clone $baseQuery)->where('status', 'dibatalkan')->count();
         $rataRata = $totalTransaksi > 0 ? (int) round($totalPendapatan / $totalTransaksi) : 0;
 
         // Tabel Laporan Penyewaan (paginated)
-        $laporanSewa = (clone $baseQuery)->with('user')
+        $laporanSewa = (clone $baseQuery)
             ->orderByDesc('tanggal')
             ->paginate(10)
             ->appends($request->query());
 
-        // Tabel Laporan Keuangan Bulanan (collection-based, no pagination needed)
+        // Tabel Laporan Keuangan Bulanan
         $laporanBulanan = (clone $baseQuery)->get()
             ->groupBy(function ($item) {
                 return Carbon::parse($item->tanggal)->format('Y-m');
@@ -91,14 +114,24 @@ class LaporanController extends Controller
             ->values();
 
         // Available months untuk filter dropdown
-        $availableMonths = Reservasi::selectRaw("DATE_FORMAT(tanggal, '%Y-%m') as bulan")
-            ->whereNotNull('tanggal')
-            ->distinct()
-            ->orderByDesc('bulan')
-            ->pluck('bulan');
+        $monthQuery = Reservasi::selectRaw("DATE_FORMAT(tanggal, '%Y-%m') as bulan")
+            ->whereNotNull('tanggal');
+        if (!empty($lapanganFilter)) {
+            $monthQuery->where('id_lapangan', $lapanganFilter);
+        }
+        $availableMonths = $monthQuery->distinct()->orderByDesc('bulan')->pluck('bulan');
 
         // Label filter aktif
         $filterLabels = [];
+        if ($user->isSuperAdmin() && !empty($lapanganFilter)) {
+            $currentLap = Lapangan::find($lapanganFilter);
+            if ($currentLap) {
+                $filterLabels[] = 'Lapangan: ' . $currentLap->nama;
+            }
+        } elseif ($user->isAdmin() && $assignedLapangan) {
+            $filterLabels[] = 'Lapangan Tugas: ' . $assignedLapangan->nama;
+        }
+
         if ($filterDate) {
             $filterLabels[] = $filterDate->translatedFormat('F Y');
         }
@@ -130,6 +163,10 @@ class LaporanController extends Controller
             'statusFilter',
             'tanggalDari',
             'tanggalSampai',
+            'lapanganFilter',
+            'lapangans',
+            'assignedLapangan',
+            'user',
             'filterLabel'
         ));
     }
@@ -139,13 +176,19 @@ class LaporanController extends Controller
      */
     public function exportExcel(Request $request)
     {
+        $user = Auth::user();
         $paidStatuses = ['disetujui', 'selesai', 'dibayar'];
 
-        // Ambil filter yang sama
         $bulanFilter = $request->input('bulan');
         $statusFilter = $request->input('status');
         $tanggalDari = $request->input('tanggal_dari');
         $tanggalSampai = $request->input('tanggal_sampai');
+
+        if ($user->isSuperAdmin()) {
+            $lapanganFilter = $request->input('lapangan_id');
+        } else {
+            $lapanganFilter = $user->id_lapangan;
+        }
 
         $filterDate = null;
         if (!empty($bulanFilter)) {
@@ -156,8 +199,12 @@ class LaporanController extends Controller
             }
         }
 
-        $query = Reservasi::with('user')
+        $query = Reservasi::with(['user', 'lapangan'])
             ->whereIn('status', array_merge($paidStatuses, ['dibatalkan']));
+
+        if (!empty($lapanganFilter)) {
+            $query->where('id_lapangan', $lapanganFilter);
+        }
 
         if ($filterDate) {
             $query->whereYear('tanggal', $filterDate->year)
@@ -214,7 +261,7 @@ class LaporanController extends Controller
                     '#RSV-' . str_pad($row->id, 4, '0', STR_PAD_LEFT),
                     Carbon::parse($row->tanggal)->format('d/m/Y'),
                     $row->user->nama ?? '-',
-                    'Lapangan Utama',
+                    $row->lapangan->nama ?? 'Lapangan Utama',
                     Carbon::parse($row->jam_mulai)->format('H:i'),
                     Carbon::parse($row->jam_selesai)->format('H:i'),
                     $row->total_harga,

@@ -272,6 +272,35 @@
                                     </div>
                                     <div class="col-12">
                                         <div class="booking-input-group row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold mb-2">
+                                                    Pilih Lapangan Futsal <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="row g-2" id="courtSelectorContainer">
+                                                    @foreach($lapangans as $idx => $lap)
+                                                        @php
+                                                            $isActiveCourt = ($unpaidReservasi ? $unpaidReservasi->id_lapangan == $lap->id : $idx === 0);
+                                                        @endphp
+                                                        <div class="col-md-4">
+                                                            <label class="court-card-label d-block h-100 p-3 border rounded-3 text-start position-relative cursor-pointer transition-all {{ $isActiveCourt ? 'border-success bg-success-subtle active-court shadow-sm' : 'bg-light' }}" style="cursor: pointer; transition: all 0.2s ease;">
+                                                                <input type="radio" name="id_lapangan" value="{{ $lap->id }}" class="form-check-input court-radio position-absolute top-0 end-0 m-3" 
+                                                                    {{ $isActiveCourt ? 'checked' : '' }}
+                                                                    {{ $unpaidReservasi ? 'disabled' : 'required' }}
+                                                                    data-nama="{{ $lap->nama }}"
+                                                                    data-tarif-siang="{{ $lap->tarif_siang }}"
+                                                                    data-tarif-malam="{{ $lap->tarif_malam }}">
+                                                                <div class="fw-bold text-dark mb-1 pe-4">{{ $lap->nama }}</div>
+                                                                <div class="text-success small fw-medium mb-1"><i class="bi bi-layers"></i> {{ $lap->tipe_lantai }}</div>
+                                                                <div class="text-secondary small mt-2 pt-2 border-top">
+                                                                    <span>Siang: <strong>Rp{{ number_format($lap->tarif_siang, 0, ',', '.') }}</strong></span><br>
+                                                                    <span>Malam: <strong>Rp{{ number_format($lap->tarif_malam, 0, ',', '.') }}</strong></span>
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+
                                             <div class="col-md-6">
                                                 <label class="form-label" for="tanggalMain">Tanggal Main</label>
                                                 <input class="form-control" type="date" id="tanggalMain" name="tanggal" 
@@ -930,12 +959,16 @@
             // --- 4. Cek Ketersediaan Jadwal AJAX ---
             const tanggalMainInput = document.getElementById('tanggalMain');
             const jamSelesaiSelect = document.getElementById('jamSelesaiMain');
+            const btnToConfirmEl = document.getElementById('btnToConfirm');
 
-            async function handleTanggalChange() {
+            async function handleScheduleChange() {
                 const tanggalPilih = tanggalMainInput?.value;
                 const jamMainSelect = document.getElementById('jamMain');
                 const errMessage = document.getElementById('tanggalError');
                 const successMessage = document.getElementById('tanggalSuccess');
+
+                const selectedCourtRadio = document.querySelector('input[name="id_lapangan"]:checked');
+                const lapanganId = selectedCourtRadio ? selectedCourtRadio.value : '';
 
                 // Reset state
                 jamMainSelect.innerHTML = '<option value="">Memuat...</option>';
@@ -947,7 +980,7 @@
                 errMessage.classList.add('d-none');
                 successMessage.classList.add('d-none');
 
-                if (!tanggalPilih) return;
+                if (!tanggalPilih || !lapanganId) return;
 
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -958,6 +991,7 @@
                     errMessage.classList.remove('d-none');
                     jamMainSelect.innerHTML = '<option value="">Tanggal sudah berlalu</option>';
                     jamMainSelect.disabled = true;
+                    if (btnToConfirmEl) btnToConfirmEl.disabled = true;
                     if (jamSelesaiSelect) {
                         jamSelesaiSelect.innerHTML = '<option value="">Tanggal sudah berlalu</option>';
                         jamSelesaiSelect.disabled = true;
@@ -970,10 +1004,26 @@
                 let jadwalOperasional = [];
 
                 try {
-                    const response = await fetch(`/reservasi/cek-jadwal?tanggal=${tanggalPilih}`);
+                    const response = await fetch(`/reservasi/cek-jadwal?tanggal=${tanggalPilih}&id_lapangan=${lapanganId}`);
                     const result = await response.json();
+
+                    if (result.status === 'tutup') {
+                        errMessage.textContent = result.message || 'Lapangan TUTUP pada tanggal ini karena tidak ada pegawai bertugas.';
+                        errMessage.classList.remove('d-none');
+                        jamMainSelect.innerHTML = '<option value="">Lapangan Tutup</option>';
+                        jamMainSelect.disabled = true;
+                        if (btnToConfirmEl) btnToConfirmEl.disabled = true;
+                        return;
+                    }
                     
                     jadwalOperasional = result.data || [];
+
+                    // Simpan tarif lapangan saat ini ke variabel global
+                    if (result.lapangan) {
+                        window.CURRENT_TARIF_SIANG = result.lapangan.tarif_siang;
+                        window.CURRENT_TARIF_MALAM = result.lapangan.tarif_malam;
+                        window.CURRENT_LAPANGAN_NAMA = result.lapangan.nama;
+                    }
 
                     jamMainSelect.innerHTML = ''; // Kosongkan
                     
@@ -997,14 +1047,13 @@
                             jamMainSelect.appendChild(opt);
                         });
                         
-                        // Simpan data operasional SEBELUM auto-select agar updateJamSelesai() bisa akses
                         jamMainSelect.dataset.operasional = JSON.stringify(jadwalOperasional);
 
                         if (adaTersedia) {
                             successMessage.classList.remove('d-none');
                             jamMainSelect.disabled = false;
+                            if (btnToConfirmEl) btnToConfirmEl.disabled = false;
                             
-                            // Pilih otomatis option pertama yang tidak disabled
                             for (let i = 0; i < jamMainSelect.options.length; i++) {
                                 if (!jamMainSelect.options[i].disabled) {
                                     jamMainSelect.selectedIndex = i;
@@ -1012,29 +1061,60 @@
                                 }
                             }
                             
-                            // Langsung panggil fungsi update jam selesai (lebih reliable daripada dispatchEvent)
                             updateJamSelesai();
                         } else {
+                            errMessage.textContent = 'Semua slot jadwal pada hari ini sudah terisi.';
                             errMessage.classList.remove('d-none');
                             jamMainSelect.innerHTML = '<option value="">Semua jadwal penuh</option>';
                             jamMainSelect.disabled = true;
+                            if (btnToConfirmEl) btnToConfirmEl.disabled = true;
                         }
 
                     } else {
                         errMessage.classList.remove('d-none');
                         jamMainSelect.innerHTML = '<option value="">Tidak ada jadwal / penuh</option>';
                         jamMainSelect.disabled = true;
+                        if (btnToConfirmEl) btnToConfirmEl.disabled = true;
                     }
 
                 } catch(err) {
                     console.error(err);
                     jamMainSelect.innerHTML = '<option value="">Gagal memuat jadwal</option>';
                 }
-                
-                // dataset.operasional sudah di-set sebelum auto-select di atas
             }
 
-            tanggalMainInput?.addEventListener('change', handleTanggalChange);
+            tanggalMainInput?.addEventListener('change', handleScheduleChange);
+
+            // Handler perubahan radio lapangan
+            document.querySelectorAll('.court-radio').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    document.querySelectorAll('.court-card-label').forEach(lbl => {
+                        lbl.classList.remove('border-success', 'bg-success-subtle', 'active-court', 'shadow-sm');
+                        lbl.classList.add('bg-light');
+                    });
+                    const parentLabel = radio.closest('.court-card-label');
+                    if (parentLabel) {
+                        parentLabel.classList.remove('bg-light');
+                        parentLabel.classList.add('border-success', 'bg-success-subtle', 'active-court', 'shadow-sm');
+                    }
+                    window.CURRENT_TARIF_SIANG = parseInt(radio.dataset.tarifSiang || '60000', 10);
+                    window.CURRENT_TARIF_MALAM = parseInt(radio.dataset.tarifMalam || '70000', 10);
+                    window.CURRENT_LAPANGAN_NAMA = radio.dataset.nama || 'Lapangan';
+
+                    handleScheduleChange();
+                    if (typeof setSummary === 'function') {
+                        setSummary("Menunggu konfirmasi");
+                    }
+                });
+            });
+
+            // Set initial court values
+            const initialRadio = document.querySelector('.court-radio:checked');
+            if (initialRadio) {
+                window.CURRENT_TARIF_SIANG = parseInt(initialRadio.dataset.tarifSiang || '60000', 10);
+                window.CURRENT_TARIF_MALAM = parseInt(initialRadio.dataset.tarifMalam || '70000', 10);
+                window.CURRENT_LAPANGAN_NAMA = initialRadio.dataset.nama || 'Lapangan';
+            }
 
             // Fungsi untuk update opsi Jam Selesai berdasarkan Jam Mulai yang dipilih
             function updateJamSelesai() {

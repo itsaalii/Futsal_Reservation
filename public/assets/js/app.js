@@ -23,8 +23,7 @@ const catatanPreview = document.getElementById("catatanPreview");
 const bookingStatusText = document.getElementById("bookingStatusText");
 const bookingStatusBadge = document.getElementById("bookingStatusBadge");
 
-// Harga berdasarkan waktu:
-// Pagi (07:00-16:59) = 60.000, Malam (17:00-22:59) = 70.000
+// Harga berdasarkan waktu (default jika belum dipilih):
 const HARGA_PAGI = 60000;
 const HARGA_MALAM = 70000;
 
@@ -39,16 +38,19 @@ function hitungEstimasi() {
 
     if (hSelesai <= hMulai) return 0;
 
+    const hargaSiang = window.CURRENT_TARIF_SIANG || HARGA_PAGI;
+    const hargaMalam = window.CURRENT_TARIF_MALAM || HARGA_MALAM;
+
     let total = 0;
     for (let jam = hMulai; jam < hSelesai; jam++) {
-        total += (jam < 17) ? HARGA_PAGI : HARGA_MALAM;
+        total += (jam < 17) ? hargaSiang : hargaMalam;
     }
 
     // Jika member aktif dan free hour belum dipakai, kurangi 1 jam termahal
     if (typeof window.MEMBER_FREE_HOUR === 'boolean' && window.MEMBER_FREE_HOUR) {
         let maxHarga = 0;
         for (let jam = hMulai; jam < hSelesai; jam++) {
-            const h = (jam < 17) ? HARGA_PAGI : HARGA_MALAM;
+            const h = (jam < 17) ? hargaSiang : hargaMalam;
             if (h > maxHarga) maxHarga = h;
         }
         total -= maxHarga;
@@ -86,6 +88,8 @@ function setSummary(statusText) {
     const tanggal = document.getElementById("tanggalMain")?.value || "-";
     const jamMulai = document.getElementById("jamMain")?.value || "-";
     const jamSelesai = document.getElementById("jamSelesaiMain")?.value || "-";
+    const selectedCourtRadio = document.querySelector('input[name="id_lapangan"]:checked');
+    const namaLapangan = selectedCourtRadio?.dataset?.nama || window.CURRENT_LAPANGAN_NAMA || "Lapangan Utama";
 
     let durasi = "-";
     if (jamMulai !== "-" && jamSelesai !== "-") {
@@ -102,6 +106,7 @@ function setSummary(statusText) {
     }
 
     summaryList.innerHTML = [
+        `<li class="mb-2">Lapangan: <span class="badge text-bg-secondary ms-1">${namaLapangan}</span></li>`,
         `<li class="mb-2">Tanggal: <span class="badge text-bg-success ms-1">${tanggal}</span></li>`,
         `<li class="mb-2">Jam: <span class="badge text-bg-primary ms-1">${jamText}</span></li>`,
         `<li class="mb-2">Durasi: <span class="badge text-bg-info ms-1">${durasi} jam</span></li>`,
@@ -115,6 +120,7 @@ function setSummary(statusText) {
 
     if (summaryListFinal) {
         summaryListFinal.innerHTML = [
+            `<li class="mb-2">Lapangan: <span class="badge text-bg-secondary ms-1">${namaLapangan}</span></li>`,
             `<li class="mb-2">Tanggal: <span class="badge text-bg-success ms-1">${tanggal}</span></li>`,
             `<li class="mb-2">Jam: <span class="badge text-bg-primary ms-1">${jamText}</span></li>`,
             `<li class="mb-2">Durasi: <span class="badge text-bg-info ms-1">${durasi} jam</span></li>`,

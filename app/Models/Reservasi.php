@@ -14,6 +14,7 @@ class Reservasi extends Model
 
     protected $fillable = [
         'id_user',
+        'id_lapangan',
         'tanggal',
         'jam_mulai',
         'jam_selesai',
@@ -28,5 +29,10 @@ class Reservasi extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id');
+    }
+
+    public function lapangan()
+    {
+        return $this->belongsTo(Lapangan::class, 'id_lapangan', 'id');
     }
 }

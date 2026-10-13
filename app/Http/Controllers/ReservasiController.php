@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Lapangan;
 use App\Models\Reservasi;
+use App\Services\ShiftService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ReservasiController extends Controller
 {
-    //
     public function tampilRiwayatBooking()
     {
-        $unpaidReservasi = Reservasi::where('id_user', Auth::id())
+        $unpaidReservasi = Reservasi::with('lapangan')
+            ->where('id_user', Auth::id())
             ->where('status', 'menunggu')
             ->whereNull('bukti_pembayaran')
             ->first();
@@ -29,19 +30,22 @@ class ReservasiController extends Controller
             $unpaidReservasi = null;
         }
 
-        $riwayat = Reservasi::where('id_user', Auth::id())
+        $riwayat = Reservasi::with('lapangan')
+            ->where('id_user', Auth::id())
             ->latest()
             ->take(3)
             ->get();
 
+        $lapangans = Lapangan::where('status', 'aktif')->get();
         $lastReservasiId = session('last_reservasi_id');
 
-        return view('pages.user.reservasi', compact('riwayat', 'lastReservasiId', 'unpaidReservasi', 'expiredMessage'));
+        return view('pages.user.reservasi', compact('riwayat', 'lastReservasiId', 'unpaidReservasi', 'expiredMessage', 'lapangans'));
     }
 
     public function riwayatLengkap()
     {
-        $semuaRiwayat = Reservasi::where('id_user', Auth::id())
+        $semuaRiwayat = Reservasi::with('lapangan')
+            ->where('id_user', Auth::id())
             ->latest()
             ->get();
 
@@ -68,7 +72,7 @@ class ReservasiController extends Controller
                 'catatan' => 'Dibatalkan otomatis: batas waktu upload bukti pembayaran (1 jam) telah habis.',
             ]);
 
-        // Cek apakah user memiliki tanggungan pembayaran (yang masih valid / belum expired)
+        // Cek apakah user memiliki tanggungan pembayaran
         $unpaidCount = Reservasi::where('id_user', Auth::id())
             ->where('status', 'menunggu')
             ->whereNull('bukti_pembayaran')
@@ -82,18 +86,32 @@ class ReservasiController extends Controller
         }
 
         $validatedData = $request->validate([
+            'id_lapangan' => 'required|exists:lapangans,id',
             'tanggal' => 'required|date',
             'jam_mulai' => ['required', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$|^24:00(:00)?$/'],
             'jam_selesai' => ['required', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$|^24:00(:00)?$/', 'after:jam_mulai'],
             'catatan' => 'nullable|string|max:500',
         ]);
 
+        $lapangan = Lapangan::findOrFail($validatedData['id_lapangan']);
+
+        // CEK APAKAH LAPANGAN BUKA (ADA PEGAWAI BERTUGAS) PADA TANGGAL INI
+        $isBuka = ShiftService::isLapanganBuka($lapangan->id, $validatedData['tanggal']);
+        if (!$isBuka) {
+            $msg = 'Maaf, ' . $lapangan->nama . ' TUTUP pada tanggal ini karena tidak ada pegawai yang bertugas.';
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $msg], 400);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+
         $jamMulai = Carbon::parse($validatedData['jam_mulai']);
         $jamSelesai = Carbon::parse($validatedData['jam_selesai']);
 
-        // CEK BENTROK JADWAL
-        $bentrok = Reservasi::where('tanggal', $validatedData['tanggal'])
-            ->whereNotIn('status', ['dibatalkan']) // Abaikan yang dibatalkan
+        // CEK BENTROK JADWAL DI LAPANGAN YANG DIPILIH
+        $bentrok = Reservasi::where('id_lapangan', $lapangan->id)
+            ->where('tanggal', $validatedData['tanggal'])
+            ->whereNotIn('status', ['dibatalkan'])
             ->where(function ($query) use ($jamMulai, $jamSelesai) {
                 $query->where(function ($q) use ($jamMulai, $jamSelesai) {
                     $q->whereTime('jam_mulai', '<=', $jamMulai->format('H:i:s'))
@@ -110,21 +128,22 @@ class ReservasiController extends Controller
             })->exists();
 
         if ($bentrok) {
+            $msg = 'Maaf, ' . $lapangan->nama . ' sudah dibooking pada jam tersebut.';
             if ($request->wantsJson()) {
-                return response()->json(['message' => 'Maaf, lapangan sudah dibooking pada jam tersebut.'], 400);
+                return response()->json(['message' => $msg], 400);
             }
-            return redirect()->back()->with('error', 'Maaf, lapangan sudah dibooking pada jam tersebut. Silakan pilih waktu lain.');
+            return redirect()->back()->with('error', $msg);
         }
 
-        // === HARGA BERDASARKAN WAKTU ===
-        // Pagi (07:00 - 16:59): Rp60.000/jam
-        // Malam (17:00 - 22:59): Rp70.000/jam
+        // === HARGA BERDASARKAN TARIF LAPANGAN ===
         $jamMulaiInt = (int) $jamMulai->format('H');
         $jamSelesaiInt = (int) $jamSelesai->format('H');
+        $tarifSiang = $lapangan->tarif_siang ?: 60000;
+        $tarifMalam = $lapangan->tarif_malam ?: 70000;
 
         $totalHarga = 0;
         for ($jam = $jamMulaiInt; $jam < $jamSelesaiInt; $jam++) {
-            $totalHarga += ($jam < 17) ? 60000 : 70000;
+            $totalHarga += ($jam < 17) ? $tarifSiang : $tarifMalam;
         }
 
         // === CEK MEMBERSHIP: FREE 1 JAM + DISKON 15% ===
@@ -133,14 +152,11 @@ class ReservasiController extends Controller
         $discountAmount = 0;
 
         if ($user && $user->membership_status === 'active' && $user->status_member == '1') {
-            // Cek apakah membership masih berlaku (belum expired)
             if ($user->membership_expires_at && Carbon::parse($user->membership_expires_at)->isFuture()) {
-
-                // 1. Terapkan Free 1 Jam jika belum dipakai
                 if (!$user->membership_free_hour_used) {
                     $jamTerMahal = 0;
                     for ($jam = $jamMulaiInt; $jam < $jamSelesaiInt; $jam++) {
-                        $hargaJam = ($jam < 17) ? 60000 : 70000;
+                        $hargaJam = ($jam < 17) ? $tarifSiang : $tarifMalam;
                         if ($hargaJam > $jamTerMahal) $jamTerMahal = $hargaJam;
                     }
                     $totalHarga -= $jamTerMahal;
@@ -148,14 +164,11 @@ class ReservasiController extends Controller
                     $freeHourApplied = true;
                 }
 
-                // 2. Terapkan Diskon 15% pada sisa harga
                 if ($totalHarga > 0) {
                     $discountAmount = round($totalHarga * 0.15);
                     $totalHarga -= $discountAmount;
                 }
-
             } else {
-                // Membership sudah expired, nonaktifkan
                 $user->membership_status = 'expired';
                 $user->status_member = '0';
                 $user->save();
@@ -164,6 +177,7 @@ class ReservasiController extends Controller
 
         $reservasi = Reservasi::create([
             'id_user' => Auth::id(),
+            'id_lapangan' => $lapangan->id,
             'tanggal' => $validatedData['tanggal'],
             'jam_mulai' => $validatedData['jam_mulai'],
             'jam_selesai' => $validatedData['jam_selesai'],
@@ -173,7 +187,6 @@ class ReservasiController extends Controller
             'catatan' => $validatedData['catatan'],
         ]);
 
-        // Update membership tracking
         if ($user && $user->membership_status === 'active' && $user->status_member == '1') {
             $user->membership_last_booking_at = now();
             if ($freeHourApplied) {
@@ -203,12 +216,10 @@ class ReservasiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Cek status: hanya bisa upload bukti jika status masih 'menunggu'
         if ($reservasi->status !== 'menunggu') {
             return response()->json(['message' => 'Reservasi ini sudah tidak dalam status menunggu pembayaran.'], 400);
         }
 
-        // Cek apakah sudah melewati batas waktu 1 jam
         if (Carbon::parse($reservasi->created_at)->addHour()->isPast()) {
             $reservasi->update([
                 'status' => 'dibatalkan',
@@ -241,7 +252,6 @@ class ReservasiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Hanya bisa membatalkan jika status 'menunggu' atau sudah dibatalkan sistem
         if (!in_array($reservasi->status, ['menunggu', 'dibatalkan'])) {
             return response()->json(['message' => 'Reservasi ini tidak dapat dibatalkan dari status saat ini.'], 400);
         }
@@ -257,7 +267,7 @@ class ReservasiController extends Controller
 
     public function cetakTiket($id)
     {
-        $reservasi = Reservasi::with('user')->where('id', $id)
+        $reservasi = Reservasi::with(['user', 'lapangan'])->where('id', $id)
             ->where('id_user', Auth::id())
             ->whereIn('status', ['disetujui', 'dibayar', 'selesai'])
             ->firstOrFail();
@@ -268,9 +278,23 @@ class ReservasiController extends Controller
     public function cekJadwalTersedia(Request $request)
     {
         $tanggal = $request->query('tanggal', now()->format('Y-m-d'));
+        $idLapangan = $request->query('id_lapangan');
 
-        // Auto-batalkan reservasi 'menunggu' yang sudah expired (>1 jam tanpa upload bukti)
-        // agar slot jadwal yang terblokir bisa dibebaskan
+        if (!$idLapangan) {
+            $defaultLapangan = Lapangan::where('status', 'aktif')->first();
+            $idLapangan = $defaultLapangan ? $defaultLapangan->id : null;
+        }
+
+        if (!$idLapangan) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data lapangan belum tersedia.'
+            ], 404);
+        }
+
+        $lapangan = Lapangan::findOrFail($idLapangan);
+
+        // Auto-batalkan reservasi 'menunggu' yang sudah expired (>1 jam)
         $limitTime = Carbon::now()->subHour();
         Reservasi::where('status', 'menunggu')
             ->whereNull('bukti_pembayaran')
@@ -280,30 +304,43 @@ class ReservasiController extends Controller
                 'catatan' => 'Dibatalkan otomatis oleh sistem (melebihi batas waktu upload bukti pembayaran 1 jam)',
             ]);
 
-        // Ambil data booking yang SUDAH ADA hari itu dan statusnya bukan dibatalkan
-        $bookingHariIni = Reservasi::where('tanggal', $tanggal)
+        // CEK APAKAH LAPANGAN BUKA PADA TANGGAL TERSEBUT
+        $isBuka = ShiftService::isLapanganBuka($lapangan->id, $tanggal);
+        if (!$isBuka) {
+            return response()->json([
+                'status' => 'tutup',
+                'message' => $lapangan->nama . ' TUTUP pada hari/tanggal ini karena tidak ada pegawai bertugas.',
+                'lapangan' => $lapangan,
+                'data' => []
+            ]);
+        }
+
+        // Ambil data booking lapangan yang dipilih pada tanggal tersebut
+        $bookingHariIni = Reservasi::where('id_lapangan', $lapangan->id)
+            ->where('tanggal', $tanggal)
             ->whereNotIn('status', ['dibatalkan'])
             ->get();
 
         $jamOperasional = [];
-        $start = 7; // Buka jam 07:00
-        $end = 22; // Batas jam mulai terakhir adalah 22:00 (selesai 23:00)
+        $start = 7;
+        $end = 22;
 
         $today = now()->format('Y-m-d');
         $currentHour = (int) now()->format('H');
+
+        $tarifSiang = $lapangan->tarif_siang ?: 60000;
+        $tarifMalam = $lapangan->tarif_malam ?: 70000;
 
         for ($i = $start; $i <= $end; $i++) {
             $jamFormat = sprintf('%02d:00', $i);
             $status = 'Tersedia';
             $keterangan = '';
-            $harga = ($i < 17) ? 60000 : 70000;
+            $harga = ($i < 17) ? $tarifSiang : $tarifMalam;
 
-            // Cek apakah hari ini dan jam sudah terlewat
             if ($tanggal === $today && $i <= $currentHour) {
                 $status = 'Waktu Berlalu';
                 $keterangan = 'Jam ini sudah terlewat';
             } else {
-                // Cek apakah jam ini masuk di range data booking yang sudah ada
                 foreach ($bookingHariIni as $booking) {
                     $jamMulaiBooking = (int) substr($booking->jam_mulai, 0, 2);
                     $jamSelesaiBooking = (int) substr($booking->jam_selesai, 0, 2);
@@ -325,6 +362,7 @@ class ReservasiController extends Controller
 
         return response()->json([
             'status' => 'success',
+            'lapangan' => $lapangan,
             'data' => $jamOperasional
         ]);
     }
