@@ -260,6 +260,23 @@
           document.body.classList.remove('overflow-hidden');
         }
       };
+
+      // Tutup modal jika klik di luar area konten (backdrop)
+      document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('fixed') && !e.target.classList.contains('hidden') && e.target.id) {
+          window.closeModal(e.target.id);
+        }
+      });
+
+      // Tutup modal saat tombol Escape ditekan
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const openModals = document.querySelectorAll('.fixed.inset-0:not(.hidden)');
+          openModals.forEach(m => {
+            if (m.id) window.closeModal(m.id);
+          });
+        }
+      });
     </script>
 
     @stack('scripts')

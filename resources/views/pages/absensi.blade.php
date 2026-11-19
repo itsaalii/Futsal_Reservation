@@ -115,13 +115,13 @@
       </div>
       <div>
         <h1 class="text-base sm:text-lg font-extrabold text-[#12162B] leading-tight">JAYA FUTSAL RFID ATTENDANCE KIOSK</h1>
-        <p class="text-xs text-[#5B6478]">Terminal Scan Presensi Mandiri Pegawai (Tanpa Perlu Login)</p>
+        <p class="text-xs text-[#5B6478]">Terminal Scan Presensi Mandiri Pegawai</p>
       </div>
     </div>
 
     <div class="flex items-center gap-2 sm:gap-3">
       <a href="{{ route('home') }}" class="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-[#5B6478] hover:text-[#12162B] bg-white/70 hover:bg-white border border-white/80 transition shadow-2xs">
-        ← Ke Website
+        Ke Website
       </a>
       <a href="{{ route('login') }}" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-[#2F6BFF] hover:bg-[#3A4BD1] transition shadow-sm shadow-blue-500/25">
         Login Admin
@@ -169,12 +169,12 @@
 
           <!-- Dummy Quick-Test Simulation Buttons -->
           <div class="pt-4 border-t border-white/60 text-left">
-            <div class="flex items-center gap-1.5 text-xs font-bold text-[#5B6478] uppercase tracking-wider mb-2.5">
+            {{-- <div class="flex items-center gap-1.5 text-xs font-bold text-[#5B6478] uppercase tracking-wider mb-2.5">
               <svg class="w-3.5 h-3.5 text-[#F5A524]" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
               </svg>
               <span>Uji Coba Cepat (Simulasi Klik Kartu Dummy):</span>
-            </div>
+            </div> --}}
             <div class="flex flex-wrap gap-2">
               <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/70 hover:bg-white text-[#12162B] border border-white/80 transition shadow-2xs" onclick="simulateScan('RFID-ADM-001')">
                 <svg class="w-3.5 h-3.5 text-[#2F6BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -59,8 +59,8 @@
                     </span>
                   @elseif($m->membership_proof)
                     <button type="button" 
-                            onclick="viewMembershipProof('{{ asset('storage/' . $m->membership_proof) }}')" 
-                            class="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-2.5 py-1 rounded-lg transition">
+                            onclick="viewMembershipProof('{{ asset('storage/' . $m->membership_proof) }}', '{{ $m->nama }}', 'Paket: {{ $m->membership_type }} | Update: {{ \Carbon\Carbon::parse($m->updated_at)->translatedFormat('d M Y H:i') }}')" 
+                            class="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-2.5 py-1 rounded-lg transition shadow-2xs">
                       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -129,26 +129,50 @@
 
   <!-- Modern Modal Bukti Membership -->
   <div id="modalBuktiMembership" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-        <h3 class="font-bold text-lg text-ink">Bukti Pembayaran Membership</h3>
-        <button type="button" onclick="closeModal('modalBuktiMembership')" class="p-1 rounded-lg text-slate-400 hover:text-ink hover:bg-slate-100 transition">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="flex items-start justify-between pb-4 border-b border-slate-100 gap-3">
+        <div>
+          <h3 id="membershipModalTitle" class="font-bold text-base sm:text-lg text-ink">Bukti Pembayaran Membership</h3>
+          <p id="membershipModalSubtitle" class="text-xs text-slate-500 mt-0.5">Detail bukti pembayaran pendaftaran membership</p>
+        </div>
+        <button type="button" onclick="closeModal('modalBuktiMembership')" class="p-1 rounded-lg text-slate-400 hover:text-ink hover:bg-slate-100 transition shrink-0">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <div class="py-4 flex-1 overflow-y-auto text-center flex items-center justify-center min-h-[300px]">
-        <img id="buktiMembershipImg" src="" alt="Bukti Membership" class="max-h-[65vh] rounded-xl object-contain mx-auto shadow-sm hidden" />
+      <div class="py-3 flex-1 overflow-y-auto text-center flex items-center justify-center min-h-[320px] bg-slate-50/70 rounded-xl my-3 border border-slate-100 p-2 relative">
+        <!-- Spinner -->
+        <div id="membershipLoadingSpinner" class="flex flex-col items-center justify-center gap-2 text-slate-400 py-8">
+          <svg class="animate-spin w-8 h-8 text-teal-600" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          <span class="text-xs font-medium">Memuat bukti membership...</span>
+        </div>
+
+        <img id="buktiMembershipImg" src="" alt="Bukti Membership" class="max-h-[65vh] w-auto max-w-full rounded-xl object-contain mx-auto shadow-sm hidden transition-all duration-200" />
         <iframe id="buktiMembershipFrame" class="w-full h-[65vh] rounded-xl border border-slate-200 hidden" title="Bukti PDF"></iframe>
-        <div id="buktiMembershipFallback" class="text-sm text-slate-500 hidden">
-          File dokumen tidak dapat ditampilkan langsung.
-          <a id="buktiMembershipLink" href="#" target="_blank" class="text-teal-600 underline font-semibold block mt-2">Buka / Unduh Bukti di Tab Baru</a>
+
+        <div id="buktiMembershipFallback" class="text-sm text-slate-500 hidden p-6 text-center">
+          <svg class="w-12 h-12 text-slate-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span class="block">Dokumen bukti tidak dapat dipratinjau langsung.</span>
+          <a id="buktiMembershipLink" href="#" target="_blank" class="text-teal-600 underline font-semibold inline-block mt-2 hover:text-teal-700">
+            Buka / Unduh Bukti di Tab Baru
+          </a>
         </div>
       </div>
 
-      <div class="pt-4 border-t border-slate-100 flex justify-end">
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+        <a id="membershipDownloadBtn" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 transition shadow-2xs">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          <span>Buka Ukuran Penuh</span>
+        </a>
         <button type="button" onclick="closeModal('modalBuktiMembership')" class="px-5 py-2 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition">
           Tutup
         </button>
@@ -158,36 +182,61 @@
 
   @push('scripts')
     <script>
-      function viewMembershipProof(fileUrl) {
+      function viewMembershipProof(fileUrl, title = '', subtitle = '') {
         const img = document.getElementById('buktiMembershipImg');
         const frame = document.getElementById('buktiMembershipFrame');
         const fallback = document.getElementById('buktiMembershipFallback');
         const link = document.getElementById('buktiMembershipLink');
+        const spinner = document.getElementById('membershipLoadingSpinner');
+        const downloadBtn = document.getElementById('membershipDownloadBtn');
+        const titleEl = document.getElementById('membershipModalTitle');
+        const subtitleEl = document.getElementById('membershipModalSubtitle');
+
+        if (titleEl) {
+          titleEl.textContent = title ? 'Bukti Membership: ' + title : 'Bukti Pembayaran Membership';
+        }
+        if (subtitleEl) {
+          subtitleEl.textContent = subtitle || 'Detail bukti pembayaran pendaftaran membership';
+        }
 
         img.classList.add('hidden');
         frame.classList.add('hidden');
         fallback.classList.add('hidden');
+        if (spinner) spinner.classList.remove('hidden');
 
         if (!fileUrl) {
+          if (spinner) spinner.classList.add('hidden');
           fallback.classList.remove('hidden');
           link.setAttribute('href', '#');
+          if (downloadBtn) downloadBtn.setAttribute('href', '#');
           openModal('modalBuktiMembership');
           return;
         }
 
         link.setAttribute('href', fileUrl);
-        const isPdf = fileUrl.toLowerCase().endsWith('.pdf');
+        if (downloadBtn) downloadBtn.setAttribute('href', fileUrl);
+
+        const isPdf = fileUrl.toLowerCase().split('?')[0].endsWith('.pdf');
 
         if (isPdf) {
+          if (spinner) spinner.classList.add('hidden');
           frame.src = fileUrl;
           frame.classList.remove('hidden');
         } else {
+          img.onload = () => {
+            if (spinner) spinner.classList.add('hidden');
+            img.classList.remove('hidden');
+          };
           img.onerror = () => {
+            if (spinner) spinner.classList.add('hidden');
             img.classList.add('hidden');
             fallback.classList.remove('hidden');
           };
           img.src = fileUrl;
-          img.classList.remove('hidden');
+          if (img.complete && img.naturalWidth > 0) {
+            if (spinner) spinner.classList.add('hidden');
+            img.classList.remove('hidden');
+          }
         }
 
         openModal('modalBuktiMembership');

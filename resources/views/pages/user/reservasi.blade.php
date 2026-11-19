@@ -6,6 +6,24 @@
 @section('content')
     @include('partials.user.reservasi-navbar')
 
+    @push('styles')
+        <style>
+            #btnToConfirm {
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #btnToConfirm:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 24px -4px rgba(47, 107, 255, 0.45);
+            }
+            #btnToConfirm:hover:not(:disabled) i {
+                transform: translateX(4px);
+            }
+            #btnToConfirm i {
+                transition: transform 0.2s ease;
+            }
+        </style>
+    @endpush
+
     @push('scripts')
         <script>
             toastr.options = {
@@ -304,6 +322,7 @@
                                             <div class="col-md-6">
                                                 <label class="form-label" for="tanggalMain">Tanggal Main</label>
                                                 <input class="form-control" type="date" id="tanggalMain" name="tanggal" 
+                                                    min="{{ date('Y-m-d') }}"
                                                     value="{{ $unpaidReservasi ? $unpaidReservasi->tanggal : '' }}"
                                                     {{ $unpaidReservasi ? 'disabled' : 'required' }} />
                                                 <div id="tanggalError" class="invalid-feedback d-none" style="display: block;">
@@ -344,76 +363,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 d-flex justify-content-end">
-                                        <button class="btn btn-accent" id="btnToConfirm" type="button" {{ $unpaidReservasi ? 'disabled' : '' }}>
-                                            Lanjut ke Konfirmasi
+                                    <div class="col-12 d-flex justify-content-end pt-3 border-top mt-3">
+                                        <button class="btn btn-accent px-4 py-2.5 rounded-3 fw-bold d-inline-flex align-items-center gap-2 shadow-sm" id="btnToConfirm" type="button" {{ $unpaidReservasi ? 'disabled' : '' }}>
+                                            <span>Lanjut ke Konfirmasi</span>
+                                            <i class="bi bi-arrow-right fs-5"></i>
                                         </button>
                                     </div>
                                 </form>
                             </div>
                             <div class="step-panel" data-step="2">
-                                <div class="form-hint-card mb-3">
-                                    <strong>Konfirmasi Pesanan:</strong> cek ulang detail jadwal sebelum
-                                    lanjut ke pembayaran.
+                                <div class="form-hint-card mb-4">
+                                    <strong>Konfirmasi Pesanan:</strong> Cek ulang detail jadwal dan ringkasan pesanan sebelum lanjut ke pembayaran.
                                 </div>
-                                <div class="booking-input-group">
-                                    <div class="mb-3">
-                                        <span class="text-secondary d-block mb-1">Catatan Tambahan</span>
-                                        <div class="booking-note" id="catatanPreview">-</div>
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button class="btn btn-outline-dark" id="btnBackToStep1" type="button">
-                                            Kembali
-                                        </button>
-                                        <button class="btn btn-accent" id="btnKonfirmasi" type="button">
-                                            Konfirmasi Pesanan
-                                        </button>
-                                        <button class="btn btn-outline-danger" id="btnBatal" type="button">
-                                            Batalkan Pesanan
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="step-panel" data-step="3">
-                                <div class="form-hint-card mb-3">
-                                    <strong>Pembayaran:</strong> pilih metode pembayaran dan upload bukti reservasi.
-                                </div>
-                                <div class="booking-input-group">
-                                    <p class="text-dark-70 mb-3">
-                                        Transfer ke rekening Jaya Futsal, lalu upload bukti pembayaran untuk aktivasi
-                                        booking.
-                                    </p>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button class="btn btn-outline-dark" id="btnBackToStep2" type="button">
-                                            Kembali
-                                        </button>
-                                        <button class="btn btn-dark" id="btnBayar" type="button">
-                                            Upload Bukti & Bayar
-                                        </button>
-                                        <button class="btn btn-outline-danger" id="btnBatalPembayaran" type="button">
-                                            Batalkan Pembayaran
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="step-panel" data-step="4">
-                                <div class="booking-input-group">
-                                    <h3 class="h5 mb-2">Status Booking</h3>
-                                    <p class="mb-3 text-dark-70">
-                                        <span class="badge text-bg-warning" id="bookingStatusBadge">Pending</span>
-                                    </p>
-                                    <p class="mb-4" id="bookingStatusText">Pembayaran diterima. Menunggu konfirmasi admin.</p>
-                                    <button class="btn btn-accent" id="btnResetBooking" type="button">
-                                        Buat Reservasi Baru
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-12">
-                            <div class="step-panel" data-step="2">
-                                <div class="order-summary">
-                                    <h3 class="h5 mb-3">Ringkasan Pesanan</h3>
+                                <div class="order-summary mb-4">
+                                    <h3 class="h5 mb-3 fw-bold text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Ringkasan Pesanan</h3>
                                     <ul class="list-unstyled mb-3 small" id="summaryList">
                                         <li>Tanggal: -</li>
                                         <li>Jam: -</li>
@@ -429,11 +392,35 @@
                                             <i class="bi bi-gift-fill me-1"></i> <strong>Voucher Free 1 Jam berhasil digunakan!</strong> Potongan 1 jam gratis telah diterapkan pada pesanan ini.
                                         </div>
                                     @endif
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <span class="text-secondary d-block mb-1 fw-semibold small">Catatan Tambahan:</span>
+                                        <div class="booking-note" id="catatanPreview">-</div>
+                                    </div>
+                                </div>
+
+                                <!-- Tombol di bagian bawah form -->
+                                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 border-top">
+                                    <button class="btn btn-outline-dark px-3 py-2 d-inline-flex align-items-center gap-1 rounded-3 fw-semibold" id="btnBackToStep1" type="button">
+                                        <i class="bi bi-arrow-left"></i> Kembali
+                                    </button>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-outline-danger px-3 py-2 d-inline-flex align-items-center gap-1 rounded-3 fw-semibold" id="btnBatal" type="button">
+                                            <i class="bi bi-x-circle"></i> Batalkan Pesanan
+                                        </button>
+                                        <button class="btn btn-accent px-4 py-2 d-inline-flex align-items-center gap-2 rounded-3 fw-bold shadow-sm" id="btnKonfirmasi" type="button">
+                                            <span>Konfirmasi Pesanan</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="step-panel" data-step="3">
-                                <div class="order-summary">
-                                    <h3 class="h5 mb-3">Pembayaran Reservasi</h3>
+                                <div class="form-hint-card mb-4">
+                                    <strong>Pembayaran:</strong> Selesaikan transfer sesuai nominal dan upload bukti pembayaran untuk mengonfirmasi reservasi.
+                                </div>
+                                <div class="order-summary mb-4">
+                                    <h3 class="h5 mb-3 fw-bold text-dark"><i class="bi bi-wallet2 me-2 text-primary"></i>Pembayaran Reservasi</h3>
                                     <div class="estimated-total mb-3">
                                         Total Pembayaran
                                         <strong>Rp120.000</strong>
@@ -442,13 +429,12 @@
                                         class="alert alert-danger py-2 small d-none"
                                         id="paymentCountdown"
                                         data-expiry="{{ $unpaidReservasi ? \Carbon\Carbon::parse($unpaidReservasi->created_at)->addHour()->toIso8601String() : '' }}">
-                                        <div class="fw-semibold">Batas Upload Bukti Pembayaran</div>
+                                        <div class="fw-semibold"><i class="bi bi-clock-history me-1"></i>Batas Upload Bukti Pembayaran</div>
                                         <div data-countdown-text>Sisa waktu: -</div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label" for="metodeBayar">Metode Pembayaran</label>
+                                        <label class="form-label fw-semibold" for="metodeBayar">Metode Pembayaran</label>
                                         <select class="form-select" id="metodeBayar" name="metode_pembayaran">
-                                        
                                             <option value="QRIS">QRIS</option>
                                         </select>
                                     </div>
@@ -456,28 +442,82 @@
                                         <p class="mb-3 fw-bold text-dark">Scan QRIS Berikut untuk Pembayaran:</p>
                                         <img src="{{ asset('assets/img/qris.png') }}" alt="QRIS Futsal" class="img-fluid rounded-3 border bg-white p-2 shadow-xs" style="max-height: 250px;">
                                     </div>
-                                    <div class="upload-proof mb-3">
-                                        <label class="form-label" for="buktiReservasi">
-                                            Upload Bukti Pembayaran Reservasi
+                                    <div class="upload-proof mb-2">
+                                        <label class="form-label fw-semibold" for="buktiReservasi">
+                                            Upload Bukti Pembayaran Reservasi <span class="text-danger">*</span>
                                         </label>
                                         <input class="form-control" type="file" id="buktiReservasi" accept="image/*,.pdf" name="bukti_pembayaran" />
                                         <small class="text-secondary d-block mt-2" id="buktiReservasiInfo">
                                             Belum ada file dipilih.
                                         </small>
                                         <div class="invalid-feedback d-block" id="buktiReservasiError"></div>
+
+                                        <!-- Container Preview Bukti Bayar -->
+                                        <div id="buktiPreviewContainer" class="d-none mt-3 p-3 bg-white border rounded-4 shadow-xs">
+                                            <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+                                                <span class="small fw-bold text-dark d-flex align-items-center gap-1">
+                                                    <i class="bi bi-image text-primary"></i> Pratinjau Bukti Bayar:
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 small rounded-pill" id="btnHapusBukti" title="Ganti atau hapus file">
+                                                    <i class="bi bi-trash3 me-1"></i>Hapus
+                                                </button>
+                                            </div>
+                                            <div id="buktiPreviewContent" class="text-center">
+                                                <img id="buktiPreviewImage" src="#" alt="Preview Bukti Pembayaran" class="img-fluid rounded-3 border bg-light shadow-2xs d-none" style="max-height: 280px; max-width: 100%; object-fit: contain;">
+                                                <div id="buktiPreviewPdf" class="d-none p-3 bg-light rounded-3 border text-start d-flex align-items-center gap-3">
+                                                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-1"></i>
+                                                    <div>
+                                                        <div class="fw-bold text-dark" id="buktiPdfName">dokumen.pdf</div>
+                                                        <small class="text-secondary" id="buktiPdfSize">0 KB</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tombol di bagian bawah form -->
+                                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center pt-3 border-top">
+                                    <button class="btn btn-outline-dark px-3 py-2 d-inline-flex align-items-center gap-1 rounded-3 fw-semibold" id="btnBackToStep2" type="button">
+                                        <i class="bi bi-arrow-left"></i> Kembali
+                                    </button>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-outline-danger px-3 py-2 d-inline-flex align-items-center gap-1 rounded-3 fw-semibold" id="btnBatalPembayaran" type="button">
+                                            <i class="bi bi-x-circle"></i> Batalkan Pembayaran
+                                        </button>
+                                        <button class="btn btn-accent px-4 py-2 d-inline-flex align-items-center gap-2 rounded-3 fw-bold shadow-sm" id="btnBayar" type="button">
+                                            <i class="bi bi-upload"></i>
+                                            <span>Upload Bukti & Bayar</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                             <div class="step-panel" data-step="4">
-                                <div class="order-summary">
-                                    <h3 class="h5 mb-3">Ringkasan Booking</h3>
+                                <div class="order-summary mb-4">
+                                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                        <h3 class="h5 mb-0 fw-bold text-dark"><i class="bi bi-check-circle-fill text-success me-2"></i>Status Booking</h3>
+                                        <span class="badge text-bg-warning fs-6" id="bookingStatusBadge">Pending</span>
+                                    </div>
+                                    <p class="mb-4 text-dark-70" id="bookingStatusText">Pembayaran diterima. Menunggu konfirmasi admin.</p>
+                                    
+                                    <h4 class="h6 mb-2 fw-bold text-dark border-top pt-3">Ringkasan Booking</h4>
                                     <ul class="list-unstyled mb-3 small" id="summaryListFinal"></ul>
                                     <small class="text-secondary d-block">
                                         Simpan bukti pembayaran untuk verifikasi admin.
                                     </small>
                                 </div>
+
+                                <!-- Tombol di bagian bawah -->
+                                <div class="d-flex justify-content-end pt-3 border-top">
+                                    <button class="btn btn-accent px-4 py-2.5 rounded-3 fw-bold d-inline-flex align-items-center gap-2 shadow-sm" id="btnResetBooking" type="button">
+                                        <i class="bi bi-plus-circle"></i>
+                                        <span>Buat Reservasi Baru</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
+
+
                     </div>
                 </div>
             </section>
@@ -895,6 +935,91 @@
                 }
             });
 
+            // --- Pratinjau Bukti Bayar Sebelum Upload ---
+            const buktiInput = document.getElementById('buktiReservasi');
+            const previewContainer = document.getElementById('buktiPreviewContainer');
+            const previewImage = document.getElementById('buktiPreviewImage');
+            const previewPdf = document.getElementById('buktiPreviewPdf');
+            const pdfName = document.getElementById('buktiPdfName');
+            const pdfSize = document.getElementById('buktiPdfSize');
+            const btnHapusBukti = document.getElementById('btnHapusBukti');
+
+            function handleBuktiPreview() {
+                if (!buktiInput || !previewContainer) return;
+                const file = buktiInput.files && buktiInput.files[0];
+
+                if (!file) {
+                    previewContainer.classList.add('d-none');
+                    if (previewImage) {
+                        previewImage.src = '#';
+                        previewImage.classList.add('d-none');
+                    }
+                    if (previewPdf) {
+                        previewPdf.classList.add('d-none');
+                    }
+                    return;
+                }
+
+                const formatBytes = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (previewImage) {
+                            previewImage.src = e.target.result;
+                            previewImage.classList.remove('d-none');
+                        }
+                        if (previewPdf) previewPdf.classList.add('d-none');
+                        previewContainer.classList.remove('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                    if (previewImage) {
+                        previewImage.src = '#';
+                        previewImage.classList.add('d-none');
+                    }
+                    if (previewPdf) {
+                        if (pdfName) pdfName.textContent = file.name;
+                        if (pdfSize) pdfSize.textContent = `${formatBytes(file.size)} (Dokumen PDF)`;
+                        previewPdf.classList.remove('d-none');
+                    }
+                    previewContainer.classList.remove('d-none');
+                } else {
+                    if (previewImage) {
+                        previewImage.src = '#';
+                        previewImage.classList.add('d-none');
+                    }
+                    if (previewPdf) {
+                        if (pdfName) pdfName.textContent = file.name;
+                        if (pdfSize) pdfSize.textContent = formatBytes(file.size);
+                        previewPdf.classList.remove('d-none');
+                    }
+                    previewContainer.classList.remove('d-none');
+                }
+            }
+
+            buktiInput?.addEventListener('change', handleBuktiPreview);
+
+            btnHapusBukti?.addEventListener('click', () => {
+                if (buktiInput) {
+                    buktiInput.value = '';
+                    buktiInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            document.getElementById('btnResetBooking')?.addEventListener('click', () => {
+                if (buktiInput) {
+                    buktiInput.value = '';
+                    handleBuktiPreview();
+                }
+            });
+
             // --- 3. Batal Pesanan ---
             btnBatal?.addEventListener('click', async () => {
                 const reservasiId = reservasiIdInput.value;
@@ -961,6 +1086,14 @@
             const jamSelesaiSelect = document.getElementById('jamSelesaiMain');
             const btnToConfirmEl = document.getElementById('btnToConfirm');
 
+            if (tanggalMainInput && !tanggalMainInput.min) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                tanggalMainInput.min = `${year}-${month}-${day}`;
+            }
+
             async function handleScheduleChange() {
                 const tanggalPilih = tanggalMainInput?.value;
                 const jamMainSelect = document.getElementById('jamMain');
@@ -987,13 +1120,12 @@
                 const pickedDate = new Date(tanggalPilih);
 
                 if (pickedDate < today) {
-                    errMessage.textContent = 'Jangan pilih hari yang sudah berlalu.';
-                    errMessage.classList.remove('d-none');
-                    jamMainSelect.innerHTML = '<option value="">Tanggal sudah berlalu</option>';
+                    tanggalMainInput.value = '';
+                    jamMainSelect.innerHTML = '<option value="">Pilih jam mulai terlebih dahulu...</option>';
                     jamMainSelect.disabled = true;
                     if (btnToConfirmEl) btnToConfirmEl.disabled = true;
                     if (jamSelesaiSelect) {
-                        jamSelesaiSelect.innerHTML = '<option value="">Tanggal sudah berlalu</option>';
+                        jamSelesaiSelect.innerHTML = '<option value="">Pilih jam mulai terlebih dahulu...</option>';
                         jamSelesaiSelect.disabled = true;
                     }
                     return;
@@ -1181,7 +1313,7 @@
             });
 
             if (tanggalMainInput?.value) {
-                handleTanggalChange();
+                handleScheduleChange();
             }
         });
     </script>

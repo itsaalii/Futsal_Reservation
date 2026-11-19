@@ -159,3 +159,13 @@ Route::middleware('auth')->group(function () {
         });
     });
 });
+
+// Fallback route untuk file storage (bukti pembayaran/membership) jika symlink tidak aktif di OS
+Route::get('/storage/{path}', function ($path) {
+    $basePath = realpath(storage_path('app/public'));
+    $filePath = realpath(storage_path('app/public/' . $path));
+    if (!$filePath || !str_starts_with($filePath, $basePath) || !file_exists($filePath)) {
+        abort(404);
+    }
+    return response()->file($filePath);
+})->where('path', '.*');
