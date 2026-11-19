@@ -191,9 +191,16 @@
                       Menunggu Konfirmasi
                     </span>
                   @elseif(in_array($r->status, ['disetujui', 'dibayar']))
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      Disetujui
-                    </span>
+                    @if($r->isSedangBerjalan())
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Sedang Berjalan
+                      </span>
+                    @else
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Disetujui
+                      </span>
+                    @endif
                   @endif
                 </td>
                 <td class="py-3.5 px-5 sm:px-6 text-right">
@@ -212,12 +219,21 @@
                         </button>
                       </form>
                     @elseif(in_array($r->status, ['disetujui', 'dibayar']))
-                      <form action="{{ route('admin.reservasi.selesai', $r->id) }}" method="POST">
-                        @csrf
-                        <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white transition shadow-2xs" type="submit" onclick="return confirm('Tandai sesi ini telah selesai bertanding?')">
-                          Selesai Main
-                        </button>
-                      </form>
+                      @if($r->isSedangBerjalan())
+                        <form action="{{ route('admin.reservasi.selesai', $r->id) }}" method="POST">
+                          @csrf
+                          <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white transition shadow-2xs" type="submit" onclick="return confirm('Tandai sesi ini telah selesai bertanding lebih awal?')">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Selesai Main</span>
+                          </button>
+                        </form>
+                      @else
+                        <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                          Belum Mulai
+                        </span>
+                      @endif
                     @elseif($r->status === 'menunggu')
                       <form action="{{ route('admin.reservasi.tolak', $r->id) }}" method="POST">
                         @csrf

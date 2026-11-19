@@ -561,14 +561,18 @@
                                 @forelse ($riwayat ?? [] as $item)
                                     <tr>
                                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
-                                        <td>Lapangan Utama</td>
+                                        <td>{{ $item->lapangan ? $item->lapangan->nama : 'Lapangan Utama' }}</td>
                                         <td>{{ substr($item->jam_mulai, 0, 5) }} - {{ substr($item->jam_selesai, 0, 5) }}</td>
                                         <td>Rp{{ number_format($item->total_harga, 0, ',', '.') }}</td>
                                         <td>
                                             @if ($item->status === 'selesai')
                                                 <span class="badge text-bg-primary">Selesai</span>
                                             @elseif (in_array($item->status, ['disetujui', 'dibayar']))
-                                                <span class="badge text-bg-success">Aktif</span>
+                                                @if ($item->isSedangBerjalan())
+                                                    <span class="badge text-bg-success"><i class="bi bi-play-circle-fill me-1"></i>Sedang Main</span>
+                                                @else
+                                                    <span class="badge text-bg-success">Aktif</span>
+                                                @endif
                                             @elseif ($item->status === 'pending')
                                                 <span class="badge text-bg-info">Pending</span>
                                             @elseif ($item->status === 'dibatalkan')
@@ -584,6 +588,13 @@
                                                     data-total="{{ $item->total_harga }}">
                                                     Bayar Sekarang
                                                 </button>
+                                            @elseif (in_array($item->status, ['disetujui', 'dibayar']) && $item->isSedangBerjalan())
+                                                <form action="{{ route('reservasi.selesai', $item->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-teal text-white fw-bold shadow-xs px-2.5 py-1 rounded-2" style="background-color: #0d9488;" onclick="return confirm('Apakah sesi bermain Anda sudah selesai?')">
+                                                        <i class="bi bi-check2-circle me-1"></i>Selesai Main
+                                                    </button>
+                                                </form>
                                             @else
                                                 -
                                             @endif

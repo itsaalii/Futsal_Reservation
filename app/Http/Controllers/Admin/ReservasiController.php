@@ -151,6 +151,10 @@ class ReservasiController extends Controller
             return redirect()->back()->with('error', 'Hanya reservasi yang sudah disetujui yang dapat diselesaikan.');
         }
 
+        if ($reservasi->isBelumBerjalan()) {
+            return redirect()->back()->with('error', 'Sesi pertandingan belum dimulai / belum berjalan.');
+        }
+
         $reservasi->status = 'selesai';
         $reservasi->save();
 

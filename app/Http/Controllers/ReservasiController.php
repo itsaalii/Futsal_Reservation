@@ -30,6 +30,19 @@ class ReservasiController extends Controller
             $unpaidReservasi = null;
         }
 
+        // Auto-selesaikan reservasi yang waktu mainnya sudah lewat
+        $now = now();
+        Reservasi::where('id_user', Auth::id())
+            ->whereIn('status', ['disetujui', 'dibayar'])
+            ->where(function ($query) use ($now) {
+                $query->where('tanggal', '<', $now->toDateString())
+                    ->orWhere(function ($q) use ($now) {
+                        $q->where('tanggal', '=', $now->toDateString())
+                          ->where('jam_selesai', '<=', $now->format('H:i:s'));
+                    });
+            })
+            ->update(['status' => 'selesai']);
+
         $riwayat = Reservasi::with('lapangan')
             ->where('id_user', Auth::id())
             ->latest()
@@ -44,6 +57,19 @@ class ReservasiController extends Controller
 
     public function riwayatLengkap()
     {
+        // Auto-selesaikan reservasi yang waktu mainnya sudah lewat
+        $now = now();
+        Reservasi::where('id_user', Auth::id())
+            ->whereIn('status', ['disetujui', 'dibayar'])
+            ->where(function ($query) use ($now) {
+                $query->where('tanggal', '<', $now->toDateString())
+                    ->orWhere(function ($q) use ($now) {
+                        $q->where('tanggal', '=', $now->toDateString())
+                          ->where('jam_selesai', '<=', $now->format('H:i:s'));
+                    });
+            })
+            ->update(['status' => 'selesai']);
+
         $semuaRiwayat = Reservasi::with('lapangan')
             ->where('id_user', Auth::id())
             ->latest()
@@ -263,6 +289,26 @@ class ReservasiController extends Controller
             'message' => 'Pesanan berhasil dibatalkan',
             'reservasi' => $reservasi
         ], 200);
+    }
+
+    public function selesaikanPesanan(Request $request, $id)
+    {
+        $reservasi = Reservasi::where('id', $id)
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
+
+        if (!in_array($reservasi->status, ['disetujui', 'dibayar'])) {
+            return redirect()->back()->with('error', 'Hanya sesi yang sudah disetujui yang dapat diselesaikan.');
+        }
+
+        if ($reservasi->isBelumBerjalan()) {
+            return redirect()->back()->with('error', 'Sesi pertandingan belum dimulai.');
+        }
+
+        $reservasi->status = 'selesai';
+        $reservasi->save();
+
+        return redirect()->back()->with('success', 'Sesi bermain telah berhasil ditandai selesai.');
     }
 
     public function cetakTiket($id)

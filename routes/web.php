@@ -73,6 +73,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/', 'buatPesanan')->name('buat');
         Route::post('/{reservasi}/bayar', 'prosesPembayaran')->name('bayar');
         Route::post('/{reservasi}/batal', 'batalkanPesanan')->name('batal');
+        Route::post('/{reservasi}/selesai', 'selesaikanPesanan')->name('selesai');
         Route::get('/{reservasi}/cetak', 'cetakTiket')->name('cetak');
     });
 

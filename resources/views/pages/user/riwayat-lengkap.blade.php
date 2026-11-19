@@ -69,9 +69,16 @@
                       Konfirmasi
                     </span>
                   @elseif (in_array($r->status, ['disetujui', 'dibayar']))
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-[#22B14C] border border-emerald-300/40">
-                      Disetujui
-                    </span>
+                    @if ($r->isSedangBerjalan())
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-[#22B14C] border border-emerald-300/40">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#22B14C] animate-pulse"></span>
+                        Sedang Main
+                      </span>
+                    @else
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-[#22B14C] border border-emerald-300/40">
+                        Disetujui
+                      </span>
+                    @endif
                   @elseif ($r->status === 'selesai')
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-[#2F6BFF] border border-primary-200">
                       Selesai
@@ -83,16 +90,29 @@
                   @endif
                 </td>
                 <td class="py-3.5 px-5 sm:px-6 text-right">
-                  @if(in_array($r->status, ['disetujui', 'dibayar', 'selesai']))
-                    <a href="{{ route('reservasi.cetak', $r->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/80 hover:bg-white text-[#12162B] border border-white/90 transition shadow-2xs">
-                      <svg class="w-3.5 h-3.5 text-[#2F6BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                      </svg>
-                      <span>Cetak Tiket</span>
-                    </a>
-                  @else
-                    <span class="text-[#8A93A6] text-xs">-</span>
-                  @endif
+                  <div class="inline-flex items-center gap-2 justify-end">
+                    @if(in_array($r->status, ['disetujui', 'dibayar']) && $r->isSedangBerjalan())
+                      <form action="{{ route('reservasi.selesai', $r->id) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-700 text-white transition shadow-2xs" onclick="return confirm('Tandai bahwa sesi main telah selesai?')">
+                          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Selesai Main</span>
+                        </button>
+                      </form>
+                    @endif
+                    @if(in_array($r->status, ['disetujui', 'dibayar', 'selesai']))
+                      <a href="{{ route('reservasi.cetak', $r->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/80 hover:bg-white text-[#12162B] border border-white/90 transition shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-[#2F6BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        <span>Cetak Tiket</span>
+                      </a>
+                    @else
+                      <span class="text-[#8A93A6] text-xs">-</span>
+                    @endif
+                  </div>
                 </td>
               </tr>
             @empty
